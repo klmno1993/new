@@ -1,0 +1,114 @@
+{
+  "app.name": "VEW",
+  "app.tagline": "A private refuge for your visual inspiration",
+
+  "nav.tokens": "Design Tokens",
+  "nav.primitives": "Primitives",
+  "nav.feedback": "Feedback & Containers",
+  "nav.components": "Domain Components",
+
+  "theme.label": "Theme",
+  "theme.dark": "Dark",
+  "theme.light": "Light",
+  "theme.auto": "Auto",
+
+  "lang.label": "Language",
+  "lang.zh": "中文",
+  "lang.en": "English",
+
+  "tokens.title": "Design Tokens",
+  "tokens.subtitle": "The visual constants every VEW surface inherits. Nothing below is decoration — these are rules.",
+  "tokens.preamble.eyebrow": "The White Swan",
+  "tokens.preamble.body": "The interface glides effortlessly above water; the work happens below. Design so natural you stop noticing it — yet take any one piece away and the whole frame goes off.",
+
+  "tokens.section.color": "Color",
+  "tokens.section.color.desc": "Four background steps, four text tiers, three line weights, a single restrained accent, and four semantic colors. All defined in OKLCH; close hues, low chroma.",
+
+  "tokens.section.type": "Typography",
+  "tokens.section.type.desc": "A dual-typeface system: Geist / Noto Sans SC handles every functional surface; Newsreader / Noto Serif SC appears only in moments meant to give pause.",
+
+  "tokens.section.space": "Spacing",
+  "tokens.section.space.desc": "4px baseline, eleven steps. Internal padding and gaps between elements both draw from this single ladder.",
+
+  "tokens.section.radius": "Radii",
+  "tokens.section.radius.desc": "Five corner sizes. Media at 10, dialogs at 16, buttons at 6 — restrained and consistent.",
+
+  "tokens.section.shadow": "Elevation",
+  "tokens.section.shadow.desc": "Dark mode barely uses shadows; we lean on background steps and borders. Light mode carries elevation across three soft layers.",
+
+  "tokens.section.motion": "Motion",
+  "tokens.section.motion.desc": "Four curves, four durations. Components don't get to invent their own.",
+
+  "tokens.section.layout": "Layout",
+  "tokens.section.layout.desc": "Desktop-first four-step breakpoint system. Container caps at 1440; the recurring gutter is 24.",
+
+  "tokens.surface": "Surfaces",
+  "tokens.text": "Text",
+  "tokens.line": "Lines",
+  "tokens.accent": "Accent",
+  "tokens.semantic": "Semantic",
+
+  "tokens.surface.canvas": "Canvas",
+  "tokens.surface.surface": "Surface",
+  "tokens.surface.raised": "Raised",
+  "tokens.surface.overlay": "Overlay",
+  "tokens.surface.sunken": "Sunken",
+
+  "tokens.text.primary": "Primary text",
+  "tokens.text.secondary": "Secondary text",
+  "tokens.text.tertiary": "Tertiary text",
+  "tokens.text.disabled": "Disabled text",
+
+  "tokens.line.hairline": "Hairline",
+  "tokens.line.soft": "Soft",
+  "tokens.line.strong": "Strong",
+
+  "tokens.accent.base": "Accent",
+  "tokens.accent.soft": "Accent · soft",
+  "tokens.accent.line": "Accent line",
+
+  "tokens.semantic.success": "Success",
+  "tokens.semantic.warning": "Warning",
+  "tokens.semantic.danger": "Danger",
+  "tokens.semantic.info": "Info",
+
+  "type.sample.display.zh": "在静水之下，用力划水",
+  "type.sample.display.en": "Effortless above, deliberate below.",
+  "type.sample.body.zh": "VEW 是创作者与策展人的私人避难所。它剥离了社交平台的喧嚣，只把你收藏的视频，放在最干净的环境里。",
+  "type.sample.body.en": "VEW is a private refuge for creators and curators. It strips away the noise of social platforms and frames the videos you save in the quietest environment we know how to build.",
+  "type.sample.label": "Label · 标签",
+  "type.sample.mono": "00:01:23.456 · /api/v1/videos/abc123",
+
+  "primitives.title": "Primitives",
+  "primitives.subtitle": "Every richer component grows from these atoms. They share one interaction grammar: 120ms hover, 200ms state change, fully keyboard-reachable.",
+
+  "primitives.button": "Buttons",
+  "primitives.button.primary": "Primary",
+  "primitives.button.secondary": "Secondary",
+  "primitives.button.ghost": "Ghost",
+  "primitives.button.danger": "Danger",
+  "primitives.button.disabled": "Disabled",
+  "primitives.button.loading": "Loading",
+
+  "primitives.iconbutton": "Icon buttons",
+  "primitives.tag": "Tag chips",
+  "primitives.input": "Inputs",
+  "primitives.input.placeholder": "Search your collection…",
+  "primitives.input.label": "Email",
+  "primitives.input.hint": "We won't share it with anyone.",
+  "primitives.input.error": "That doesn't look like an email.",
+
+  "primitives.switch": "Switches",
+  "primitives.switch.on": "On",
+  "primitives.switch.off": "Off",
+
+  "common.action.save": "Save",
+  "common.action.cancel": "Cancel",
+  "common.action.delete": "Delete",
+  "common.action.edit": "Edit",
+  "common.action.confirm": "Confirm",
+  "common.action.add": "Add",
+  "common.action.search": "Search",
+  "common.action.like": "Like",
+  "common.action.more": "More"
+}

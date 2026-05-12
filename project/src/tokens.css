@@ -1,0 +1,298 @@
+/* ──────────────────────────────────────────────────────────────────
+   VEW · Design Tokens
+   ──────────────────
+   The single source of truth for color, type, spacing, radii,
+   elevation, motion, and layout. Every component reads from here.
+
+   Direction · Static Charcoal Grey · dark default
+   Philosophy · the White Swan: effortless above, deliberate below
+   ────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Type families ───────────────────────────────────────────── */
+  /* UI: a calm geometric sans for everything functional —
+     navigation, buttons, body, labels, numbers. */
+  --font-ui: "Geist", "Noto Sans SC", "PingFang SC", "HarmonyOS Sans SC",
+    -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+
+  /* Display: a soft contemporary serif for moments that deserve
+     pause — page titles, hero headings, empty-state copy, quotes.
+     Used sparingly. The contrast IS the design. */
+  --font-display: "Newsreader", "Noto Serif SC", "Songti SC",
+    "Source Han Serif SC", Georgia, serif;
+
+  /* Mono: for timecodes, file paths, IDs, code. */
+  --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace,
+    "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── Type scale ──────────────────────────────────────────────── */
+  /* Eight sizes. Line-height is paired and immutable per size. */
+  --text-micro:   11px;  --lh-micro:   16px;
+  --text-caption: 12px;  --lh-caption: 18px;
+  --text-small:   13px;  --lh-small:   20px;
+  --text-body:    14px;  --lh-body:    22px;
+  --text-lg:      16px;  --lh-lg:      26px;
+  --text-title:   20px;  --lh-title:   28px;
+  --text-h2:      28px;  --lh-h2:      36px;
+  --text-display: 40px;  --lh-display: 50px;
+
+  /* Tracking — most type rests at 0; display lets the serif breathe. */
+  --tracking-tight:   -0.01em;
+  --tracking-normal:   0;
+  --tracking-wide:     0.04em;
+  --tracking-uppercase: 0.12em;
+
+  /* Weights — UI sans uses 300/400/500; serif uses 400/500. */
+  --weight-light:    300;
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+
+  /* ── Spacing scale (4px baseline) ───────────────────────────── */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* ── Radii ──────────────────────────────────────────────────── */
+  --radius-xs:   2px;   /* hairline tags, micro chips */
+  --radius-sm:   6px;   /* buttons, inputs */
+  --radius-md:   10px;  /* media, cards */
+  --radius-lg:   16px;  /* dialogs, sheets */
+  --radius-xl:   24px;  /* hero surfaces */
+  --radius-full: 9999px;
+
+  /* ── Motion ─────────────────────────────────────────────────── */
+  --duration-1: 120ms;  /* micro: hover, focus, ripple */
+  --duration-2: 200ms;  /* default: panels, menus */
+  --duration-3: 320ms;  /* gentle: dialogs, page transitions */
+  --duration-4: 520ms;  /* deliberate: orchestrated entries */
+
+  /* Curves. Don't reach outside this set. */
+  --ease-enter:  cubic-bezier(0.16, 1, 0.3, 1);    /* deceleration */
+  --ease-exit:   cubic-bezier(0.7, 0, 0.84, 0);    /* acceleration */
+  --ease-swift:  cubic-bezier(0.4, 0, 0.2, 1);     /* standard */
+  --ease-gentle: cubic-bezier(0.45, 0.05, 0.55, 0.95); /* sine-ish */
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  --bp-sm:   720px;   /* phone → tablet */
+  --bp-md:  1024px;   /* tablet → desktop */
+  --bp-lg:  1280px;
+  --bp-xl:  1600px;
+
+  --container-max: 1440px;
+  --gutter:        var(--space-5);
+
+  /* ── Z-index ────────────────────────────────────────────────── */
+  --z-base:     1;
+  --z-raised:   10;
+  --z-sticky:   100;
+  --z-overlay:  500;
+  --z-dialog:   1000;
+  --z-toast:    2000;
+  --z-tooltip:  3000;
+
+  /* ── Focus ring (visible, never garish) ─────────────────────── */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME · Dark (default) — Static Charcoal
+   The dusk room. Cool, low-saturation, paper-like quiet.
+   ────────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces — four steps from canvas to overlay */
+  --bg-canvas:  oklch(0.158 0.006 250);
+  --bg-surface: oklch(0.188 0.007 250);
+  --bg-raised:  oklch(0.218 0.008 250);
+  --bg-overlay: oklch(0.248 0.009 250);
+  --bg-sunken:  oklch(0.135 0.005 250);  /* below canvas — for inset wells */
+
+  /* Lines — pure-channel alpha so they thicken with content, not color */
+  --line-hairline: oklch(1 0 0 / 0.06);
+  --line-soft:     oklch(1 0 0 / 0.10);
+  --line-strong:   oklch(1 0 0 / 0.16);
+
+  /* Text — four legibility tiers */
+  --text-primary:   oklch(0.965 0.004 250);
+  --text-secondary: oklch(0.745 0.008 250);
+  --text-tertiary:  oklch(0.555 0.008 250);
+  --text-disabled:  oklch(0.395 0.008 250);
+  --text-on-accent: oklch(0.155 0.006 250);
+
+  /* Accent — moonlight blue. Whispers, never shouts. */
+  --accent:         oklch(0.755 0.055 225);
+  --accent-hover:   oklch(0.795 0.060 225);
+  --accent-pressed: oklch(0.715 0.050 225);
+  --accent-soft:    oklch(0.755 0.055 225 / 0.14);
+  --accent-line:    oklch(0.755 0.055 225 / 0.32);
+
+  /* Semantic — desaturated, never primary-color-loud */
+  --success:      oklch(0.745 0.080 160);
+  --success-soft: oklch(0.745 0.080 160 / 0.14);
+  --warning:      oklch(0.800 0.090 80);
+  --warning-soft: oklch(0.800 0.090 80 / 0.14);
+  --danger:       oklch(0.700 0.130 25);
+  --danger-soft:  oklch(0.700 0.130 25 / 0.14);
+  --info:         oklch(0.755 0.055 225);
+  --info-soft:    oklch(0.755 0.055 225 / 0.14);
+
+  /* Selection */
+  --selection-bg: oklch(0.755 0.055 225 / 0.28);
+  --selection-fg: oklch(0.985 0.004 250);
+
+  /* Elevation — almost invisible in dark; we lean on borders + bg steps */
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.30);
+  --shadow-2: 0 4px 12px oklch(0 0 0 / 0.32),
+              0 2px 4px  oklch(0 0 0 / 0.20);
+  --shadow-3: 0 12px 32px oklch(0 0 0 / 0.42),
+              0 4px 12px  oklch(0 0 0 / 0.24);
+
+  /* Backdrop scrim under dialogs */
+  --scrim: oklch(0.10 0.005 250 / 0.62);
+
+  /* Media tints — for thumbnail backgrounds when the image hasn't loaded */
+  --media-placeholder: oklch(0.215 0.008 250);
+  --media-shimmer:     oklch(0.255 0.009 250);
+
+  /* Focus ring */
+  --focus-ring: oklch(0.755 0.055 225 / 0.55);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   THEME · Light — Warm Paper
+   The reading room. Off-white paper, near-black ink, breath.
+   ────────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-canvas:  oklch(0.975 0.004 95);
+  --bg-surface: oklch(1     0     0);
+  --bg-raised:  oklch(1     0     0);
+  --bg-overlay: oklch(1     0     0);
+  --bg-sunken:  oklch(0.955 0.004 95);
+
+  --line-hairline: oklch(0 0 0 / 0.06);
+  --line-soft:     oklch(0 0 0 / 0.10);
+  --line-strong:   oklch(0 0 0 / 0.18);
+
+  --text-primary:   oklch(0.180 0.008 250);
+  --text-secondary: oklch(0.420 0.008 250);
+  --text-tertiary:  oklch(0.585 0.008 250);
+  --text-disabled:  oklch(0.745 0.008 250);
+  --text-on-accent: oklch(0.985 0.004 95);
+
+  --accent:         oklch(0.520 0.080 230);
+  --accent-hover:   oklch(0.475 0.085 230);
+  --accent-pressed: oklch(0.430 0.085 230);
+  --accent-soft:    oklch(0.520 0.080 230 / 0.10);
+  --accent-line:    oklch(0.520 0.080 230 / 0.28);
+
+  --success:      oklch(0.510 0.110 160);
+  --success-soft: oklch(0.510 0.110 160 / 0.10);
+  --warning:      oklch(0.620 0.130 75);
+  --warning-soft: oklch(0.620 0.130 75 / 0.12);
+  --danger:       oklch(0.530 0.165 25);
+  --danger-soft:  oklch(0.530 0.165 25 / 0.10);
+  --info:         oklch(0.520 0.080 230);
+  --info-soft:    oklch(0.520 0.080 230 / 0.10);
+
+  --selection-bg: oklch(0.520 0.080 230 / 0.18);
+  --selection-fg: oklch(0.180 0.008 250);
+
+  /* Light-mode shadows do real work — close, soft, layered */
+  --shadow-1: 0 1px 2px  oklch(0 0 0 / 0.04),
+              0 1px 1px  oklch(0 0 0 / 0.03);
+  --shadow-2: 0 4px 12px oklch(0 0 0 / 0.06),
+              0 2px 4px  oklch(0 0 0 / 0.04);
+  --shadow-3: 0 12px 32px oklch(0 0 0 / 0.10),
+              0 4px 12px  oklch(0 0 0 / 0.06);
+
+  --scrim: oklch(0.30 0.008 250 / 0.32);
+
+  --media-placeholder: oklch(0.945 0.004 95);
+  --media-shimmer:     oklch(0.975 0.004 95);
+
+  --focus-ring: oklch(0.520 0.080 230 / 0.45);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Base reset — light, opinionated, trusts the tokens
+   ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "ss02", "cv11", "calt", "kern";
+}
+
+body {
+  margin: 0;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-normal);
+  transition:
+    background-color var(--duration-3) var(--ease-swift),
+    color            var(--duration-3) var(--ease-swift);
+}
+
+::selection { background: var(--selection-bg); color: var(--selection-fg); }
+
+::-webkit-scrollbar             { width: 10px; height: 10px; }
+::-webkit-scrollbar-track       { background: transparent; }
+::-webkit-scrollbar-thumb       { background: var(--line-soft); border-radius: var(--radius-full); border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--line-strong); background-clip: content-box; border: 2px solid transparent; }
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 2px;
+}
+
+/* When components opt in, they handle their own focus ring */
+[data-focus="custom"]:focus-visible { outline: none; }
+
+/* ──────────────────────────────────────────────────────────────────
+   Type utility classes — pre-paired size + line-height + family
+   Use these. Don't set font-size raw.
+   ────────────────────────────────────────────────────────────────── */
+.t-display     { font-family: var(--font-display); font-size: var(--text-display); line-height: var(--lh-display); font-weight: var(--weight-regular); letter-spacing: var(--tracking-tight); }
+.t-h2          { font-family: var(--font-display); font-size: var(--text-h2);      line-height: var(--lh-h2);      font-weight: var(--weight-regular); letter-spacing: var(--tracking-tight); }
+.t-title       { font-size: var(--text-title);   line-height: var(--lh-title);   font-weight: var(--weight-medium); }
+.t-lg          { font-size: var(--text-lg);      line-height: var(--lh-lg);      font-weight: var(--weight-regular); }
+.t-body        { font-size: var(--text-body);    line-height: var(--lh-body);    font-weight: var(--weight-regular); }
+.t-small       { font-size: var(--text-small);   line-height: var(--lh-small);   font-weight: var(--weight-regular); }
+.t-caption     { font-size: var(--text-caption); line-height: var(--lh-caption); font-weight: var(--weight-regular); color: var(--text-secondary); }
+.t-micro       { font-size: var(--text-micro);   line-height: var(--lh-micro);   font-weight: var(--weight-regular); color: var(--text-tertiary); }
+.t-mono        { font-family: var(--font-mono); font-feature-settings: "tnum"; }
+.t-eyebrow     { font-size: var(--text-micro);   line-height: var(--lh-micro);   font-weight: var(--weight-medium); letter-spacing: var(--tracking-uppercase); text-transform: uppercase; color: var(--text-tertiary); }
+.t-secondary   { color: var(--text-secondary); }
+.t-tertiary    { color: var(--text-tertiary); }
+
+/* ──────────────────────────────────────────────────────────────────
+   Reduced motion — collapse to 1ms, keep state changes
+   ────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}

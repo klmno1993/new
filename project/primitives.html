@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VEW · 基础组件</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,16..72,400;0,16..72,500;0,16..72,600;1,16..72,400&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="src/tokens.css" />
+  <link rel="stylesheet" href="src/primitives.css" />
+
+  <style>
+    /* ── Page chrome ─────────────────────────────────────────── */
+    .shell { max-width: 1040px; margin: 0 auto; padding: var(--space-7) var(--space-6) var(--space-10); }
+    @media (min-width: 1280px) {
+      .shell { padding-left: var(--space-8); padding-right: var(--space-8); }
+    }
+
+    .topbar {
+      position: sticky; top: 0; z-index: var(--z-sticky);
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      background: color-mix(in oklch, var(--bg-canvas) 78%, transparent);
+      border-bottom: 1px solid var(--line-hairline);
+    }
+    .topbar-inner {
+      max-width: 1040px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-6);
+      height: 56px;
+    }
+    .brand { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-mark { width: 24px; height: 24px; display: inline-flex; }
+    .brand-name {
+      font-family: var(--font-ui); font-size: 17px;
+      letter-spacing: -0.02em;
+      font-weight: var(--weight-medium);
+    }
+    .brand-divider { width: 1px; height: 16px; background: var(--line-soft); margin: 0 var(--space-3); }
+    .brand-section { font-size: var(--text-small); color: var(--text-secondary); letter-spacing: var(--tracking-wide); }
+
+    .controls { display: flex; align-items: center; gap: var(--space-3); }
+    .segment {
+      display: inline-flex; align-items: center; padding: 2px;
+      background: var(--bg-surface);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-full);
+      gap: 2px;
+    }
+    .segment button {
+      appearance: none; border: 0; cursor: pointer;
+      padding: 4px 10px; font: inherit;
+      font-size: var(--text-caption); line-height: 1;
+      color: var(--text-secondary); background: transparent;
+      border-radius: var(--radius-full);
+      transition: color var(--duration-1) var(--ease-swift),
+                  background var(--duration-1) var(--ease-swift);
+    }
+    .segment button:hover { color: var(--text-primary); }
+    .segment button[aria-pressed="true"] {
+      background: var(--bg-raised); color: var(--text-primary);
+      box-shadow: 0 0 0 1px var(--line-soft) inset;
+    }
+
+    .hero { padding-top: var(--space-7); padding-bottom: var(--space-7); border-bottom: 1px solid var(--line-hairline); }
+    .eyebrow {
+      font-size: var(--text-micro); line-height: var(--lh-micro);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-uppercase); text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: var(--space-4);
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-weight: var(--weight-regular);
+      font-size: clamp(34px, 4.5vw, 48px);
+      line-height: 1.14;
+      letter-spacing: var(--tracking-tight);
+      margin: 0 0 var(--space-5);
+      color: var(--text-primary);
+      max-width: 26ch;
+    }
+    .hero p {
+      font-size: var(--text-lg); line-height: var(--lh-lg);
+      color: var(--text-secondary);
+      max-width: 62ch; margin: 0;
+    }
+
+    section.pr-section { padding: var(--space-7) 0; border-bottom: 1px solid var(--line-hairline); }
+    section.pr-section:last-of-type { border-bottom: 0; }
+
+    .section-head { margin-bottom: var(--space-5); display: grid; gap: var(--space-2); }
+    .section-head .num { font-family: var(--font-mono); font-size: var(--text-caption); color: var(--text-tertiary); }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-weight: var(--weight-regular);
+      font-size: var(--text-h2); line-height: var(--lh-h2);
+      letter-spacing: var(--tracking-tight);
+      margin: 0;
+    }
+    .section-head p { font-size: var(--text-body); color: var(--text-secondary); margin: 0; max-width: 60ch; }
+
+    .demo {
+      background: var(--bg-surface);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      display: grid; gap: var(--space-4);
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: var(--space-4);
+      align-items: center;
+    }
+    .demo-grid .lbl {
+      font-family: var(--font-mono); font-size: var(--text-caption);
+      color: var(--text-tertiary); padding-top: 2px;
+    }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center;
+    }
+    .demo-divide { height: 1px; background: var(--line-hairline); }
+
+    .layout { display: grid; grid-template-columns: 1fr; gap: var(--space-7); }
+    @media (min-width: 1100px) {
+      .layout { grid-template-columns: 200px 1fr; gap: var(--space-8); }
+      .toc { position: sticky; top: 80px; align-self: start; padding-top: var(--space-7); }
+    }
+    .toc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+    .toc-list a {
+      display: grid; grid-template-columns: 28px 1fr; gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-sm);
+      color: var(--text-tertiary);
+      text-decoration: none;
+      font-size: var(--text-small);
+      transition: color var(--duration-1) var(--ease-swift), background var(--duration-1) var(--ease-swift);
+    }
+    .toc-list a:hover { color: var(--text-primary); background: var(--bg-surface); }
+    .toc-list a .n { font-family: var(--font-mono); font-size: 10px; color: var(--text-disabled); }
+    .toc-list a.active { color: var(--text-primary); }
+    .toc-list a.active .n { color: var(--accent); }
+
+    .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); }
+
+    .foot { padding-top: var(--space-7); padding-bottom: var(--space-4);
+            display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;
+            color: var(--text-tertiary); font-size: var(--text-small); }
+    .foot a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--line-soft); transition: color var(--duration-1) var(--ease-swift); }
+    .foot a:hover { color: var(--text-primary); }
+
+    /* Brand mark — refined V (white-swan version of user's concept) */
+    .brand-svg .l-wing { fill: var(--text-primary); }
+    .brand-svg .r-wing { fill: var(--text-primary); opacity: 0.32; }
+  </style>
+</head>
+<body>
+  <!-- Reusable brand mark — refined two-stroke V -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="vew-mark" viewBox="0 0 120 120">
+        <!-- Left wing: solid, slightly narrower, soft inner join -->
+        <path class="l-wing" d="M27 22 Q26 18 30 18 L40 18 Q43 18 44 21 L62 86 Q62.5 89 60 89 L52 89 Q49 89 48 86 L27 22 Z"/>
+        <!-- Right wing: translucent, mirrored -->
+        <path class="r-wing" d="M93 22 Q94 18 90 18 L80 18 Q77 18 76 21 L58 86 Q57.5 89 60 89 L68 89 Q71 89 72 86 L93 22 Z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <svg class="brand-mark brand-svg" aria-hidden="true"><use href="#vew-mark"/></svg>
+        <span class="brand-name">VEW</span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-section" data-i18n="primitives.title">基础组件</span>
+      </div>
+      <div class="controls">
+        <a href="tokens.html" style="color: var(--text-tertiary); text-decoration: none; font-size: var(--text-small); transition: color var(--duration-1) var(--ease-swift);"
+           onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-tertiary)'">← Tokens</a>
+        <div class="segment" role="group" aria-label="Theme">
+          <button data-theme-set="dark"  data-i18n="theme.dark">暗</button>
+          <button data-theme-set="light" data-i18n="theme.light">亮</button>
+          <button data-theme-set="auto"  data-i18n="theme.auto">跟随</button>
+        </div>
+        <div class="segment" role="group" aria-label="Language">
+          <button data-lang-set="zh">中</button>
+          <button data-lang-set="en">EN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Pass 01 · Primitives</div>
+      <h1>原子的克制。</h1>
+      <p data-i18n="primitives.subtitle">所有更复杂的组件都从这些原子里长出来。每一个都遵循同一套交互语言：120ms hover · 200ms 状态切换 · 永远可键盘到达。</p>
+    </section>
+
+    <div class="layout">
+      <aside class="toc">
+        <ul class="toc-list">
+          <li><a href="#button"   data-toc="button"><span class="n">01</span><span>Button</span></a></li>
+          <li><a href="#iconbtn"  data-toc="iconbtn"><span class="n">02</span><span>Icon Button</span></a></li>
+          <li><a href="#tag"      data-toc="tag"><span class="n">03</span><span>Tag</span></a></li>
+          <li><a href="#input"    data-toc="input"><span class="n">04</span><span>Input</span></a></li>
+          <li><a href="#textarea" data-toc="textarea"><span class="n">05</span><span>Textarea</span></a></li>
+          <li><a href="#select"   data-toc="select"><span class="n">06</span><span>Select</span></a></li>
+          <li><a href="#switch"   data-toc="switch"><span class="n">07</span><span>Switch</span></a></li>
+          <li><a href="#check"    data-toc="check"><span class="n">08</span><span>Checkbox</span></a></li>
+          <li><a href="#radio"    data-toc="radio"><span class="n">09</span><span>Radio</span></a></li>
+          <li><a href="#tooltip"  data-toc="tooltip"><span class="n">10</span><span>Tooltip</span></a></li>
+          <li><a href="#avatar"   data-toc="avatar"><span class="n">11</span><span>Avatar</span></a></li>
+          <li><a href="#divider"  data-toc="divider"><span class="n">12</span><span>Divider</span></a></li>
+          <li><a href="#skel"     data-toc="skel"><span class="n">13</span><span>Skeleton</span></a></li>
+          <li><a href="#spin"     data-toc="spin"><span class="n">14</span><span>Spinner</span></a></li>
+        </ul>
+      </aside>
+
+      <div class="content">
+
+        <!-- ── 01 Button ──────────────────────────────────────── -->
+        <section id="button" class="pr-section">
+          <header class="section-head">
+            <div class="num">01 · Button</div>
+            <h2>按钮</h2>
+            <p>主操作（Primary）每屏至多一个；次操作（Secondary）承担大多数动作；幽灵（Ghost）用于工具栏与重复列表；强调（Accent）与危险（Danger）只在它们应当出现的地方出现。</p>
+          </header>
+
+          <div class="demo">
+            <div class="demo-grid">
+              <span class="lbl">Variants · md</span>
+              <div class="demo-row">
+                <button class="btn" data-variant="primary">主操作</button>
+                <button class="btn" data-variant="secondary">次操作</button>
+                <button class="btn" data-variant="ghost">幽灵</button>
+                <button class="btn" data-variant="accent">强调</button>
+                <button class="btn" data-variant="danger">危险</button>
+                <button class="btn" data-variant="danger-solid">危险（强）</button>
+              </div>
+            </div>
+            <div class="demo-divide"></div>
+            <div class="demo-grid">
+              <span class="lbl">Sizes</span>
+              <div class="demo-row">
+                <button class="btn" data-variant="secondary" data-size="sm">Small</button>
+                <button class="btn" data-variant="secondary">Medium</button>
+                <button class="btn" data-variant="secondary" data-size="lg">Large</button>
+              </div>
+            </div>
+            <div class="demo-divide"></div>
+            <div class="demo-grid">
+              <span class="lbl">With icon</span>
+              <div class="demo-row">
+                <button class="btn" data-variant="primary">
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>
+                  添加视频
+                </button>
+                <button class="btn" data-variant="secondary">
+                  导出
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v8M5 8l3 3 3-3M3 13h10"/></svg>
+                </button>
+                <button class="btn" data-variant="ghost">
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4"/><path d="M13 13l-3-3"/></svg>
+                  搜索
+                </button>
+              </div>
+            </div>
+            <div class="demo-divide"></div>
+            <div class="demo-grid">
+              <span class="lbl">States</span>
+              <div class="demo-row">
+                <button class="btn" data-variant="secondary">默认</button>
+                <button class="btn" data-variant="secondary" data-loading="true">Loading</button>
+                <button class="btn" data-variant="secondary" disabled>禁用</button>
+                <button class="btn" data-variant="primary" disabled>禁用主操作</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 02 Icon Button ─────────────────────────────────── -->
+        <section id="iconbtn" class="pr-section">
+          <header class="section-head">
+            <div class="num">02 · Icon Button</div>
+            <h2>图标按钮</h2>
+            <p>工具栏与卡片角落的常客。默认无边、低对比，hover 时才浮出柔和背景。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-grid">
+              <span class="lbl">Default</span>
+              <div class="demo-row">
+                <button class="icon-btn" aria-label="like" data-tooltip="喜欢 · L">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
+                <button class="icon-btn" aria-label="bookmark" data-tooltip="加入合集">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </button>
+                <button class="icon-btn" aria-label="share">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                </button>
+                <button class="icon-btn" aria-label="more">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Tones &amp; sizes</span>
+              <div class="demo-row">
+                <button class="icon-btn" data-tone="accent" data-active="true" aria-label="liked">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
+                <button class="icon-btn" data-tone="danger" aria-label="delete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
+                <button class="icon-btn" data-size="sm" aria-label="close">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                </button>
+                <button class="icon-btn" data-size="lg" data-shape="round" aria-label="play">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 03 Tag ────────────────────────────────────────── -->
+        <section id="tag" class="pr-section">
+          <header class="section-head">
+            <div class="num">03 · Tag</div>
+            <h2>标签</h2>
+            <p>分类、状态、可选过滤器都长成这副样子——但身份不同：颜色与圆角语义化区分。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-grid">
+              <span class="lbl">Default</span>
+              <div class="demo-row">
+                <span class="tag">摄影</span>
+                <span class="tag">音乐 MV</span>
+                <span class="tag" data-tone="accent">精选</span>
+                <span class="tag" data-tone="success">已下载</span>
+                <span class="tag" data-tone="warning">解析中</span>
+                <span class="tag" data-tone="danger">源失效</span>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Pill / dot</span>
+              <div class="demo-row">
+                <span class="tag" data-shape="pill"><span class="tag-dot"></span>YouTube</span>
+                <span class="tag" data-shape="pill"><span class="tag-dot"></span>Bilibili</span>
+                <span class="tag" data-shape="pill" data-tone="accent"><span class="tag-dot"></span>Vimeo</span>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Removable</span>
+              <div class="demo-row">
+                <span class="tag">设计灵感<span class="tag-close" role="button" aria-label="remove">×</span></span>
+                <span class="tag" data-tone="accent">动效<span class="tag-close" role="button" aria-label="remove">×</span></span>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Selectable</span>
+              <div class="demo-row" id="tag-selectable">
+                <span class="tag" data-selectable="true">短片</span>
+                <span class="tag" data-selectable="true" data-selected="true">摄影</span>
+                <span class="tag" data-selectable="true">动效</span>
+                <span class="tag" data-selectable="true">访谈</span>
+                <span class="tag" data-selectable="true">广告</span>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Sizes</span>
+              <div class="demo-row">
+                <span class="tag" data-size="sm">SM</span>
+                <span class="tag">MD</span>
+                <span class="tag" data-size="lg">LG</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 04 Input ───────────────────────────────────────── -->
+        <section id="input" class="pr-section">
+          <header class="section-head">
+            <div class="num">04 · Input</div>
+            <h2>输入</h2>
+            <p>四态明确：默认、hover、focus（柔光环不是粗框）、error（仅错误时换色，不抖动）。</p>
+          </header>
+          <div class="demo">
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">默认</label>
+                <div class="input-wrap"><input class="input" placeholder="搜索你的收藏…" /></div>
+              </div>
+              <div class="field">
+                <label class="field-label">含前缀图标</label>
+                <div class="input-wrap">
+                  <span class="input-prefix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3" stroke-linecap="round"/></svg></span>
+                  <input class="input" placeholder="搜索 · ⌘K" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">含后缀</label>
+                <div class="input-wrap">
+                  <input class="input" placeholder="0.00" />
+                  <span class="input-suffix"><span class="t-mono t-caption" style="color: var(--text-tertiary)">GB</span></span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Error · 错误态</label>
+                <div class="input-wrap" data-state="error">
+                  <input class="input" value="not-an-email" />
+                </div>
+                <span class="field-hint" data-tone="error" data-i18n="primitives.input.error">邮箱格式不正确</span>
+              </div>
+              <div class="field">
+                <label class="field-label">禁用</label>
+                <div class="input-wrap"><input class="input" disabled value="已锁定 / locked" /></div>
+                <span class="field-hint">只读字段说明 · Read-only hint</span>
+              </div>
+              <div class="field">
+                <label class="field-label">尺寸 · LG</label>
+                <div class="input-wrap" data-size="lg"><input class="input" placeholder="登录邮箱 · Email" /></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 05 Textarea ────────────────────────────────────── -->
+        <section id="textarea" class="pr-section">
+          <header class="section-head">
+            <div class="num">05 · Textarea</div>
+            <h2>多行输入</h2>
+            <p>给视频写一段为什么收藏。可垂直拉伸，但不允许水平。</p>
+          </header>
+          <div class="demo">
+            <div class="field">
+              <label class="field-label">备注</label>
+              <textarea class="textarea" placeholder="例如：这段 1:23 的转场绝了。"></textarea>
+              <span class="field-hint">支持 Markdown · ⌘+Enter 保存</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 06 Select ──────────────────────────────────────── -->
+        <section id="select" class="pr-section">
+          <header class="section-head">
+            <div class="num">06 · Select</div>
+            <h2>下拉</h2>
+            <p>原生选择器，皮肤接入系统。复杂选择（多选、搜索）由后续的 Menu / Combobox 承担。</p>
+          </header>
+          <div class="demo">
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">默认排序</label>
+                <div class="select-wrap">
+                  <select class="select">
+                    <option>最近添加</option>
+                    <option>最近观看</option>
+                    <option>标题</option>
+                    <option>时长</option>
+                    <option>创作者</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">网格密度</label>
+                <div class="select-wrap">
+                  <select class="select">
+                    <option>舒适</option>
+                    <option>紧凑</option>
+                    <option>极简</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">禁用</label>
+                <div class="select-wrap"><select class="select" disabled><option>不可选</option></select></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 07 Switch ──────────────────────────────────────── -->
+        <section id="switch" class="pr-section">
+          <header class="section-head">
+            <div class="num">07 · Switch</div>
+            <h2>开关</h2>
+            <p>用于"现在是 / 不是"，不用于提交。状态切换 200ms，落点带轻微滑出。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-grid">
+              <span class="lbl">Default</span>
+              <div class="demo-row" style="gap: var(--space-5)">
+                <label class="switch"><input type="checkbox" checked /><span class="switch-track"></span><span class="switch-thumb"></span></label>
+                <label class="switch"><input type="checkbox" /><span class="switch-track"></span><span class="switch-thumb"></span></label>
+                <label class="switch"><input type="checkbox" disabled /><span class="switch-track"></span><span class="switch-thumb"></span></label>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">In context</span>
+              <div class="demo-row" style="flex-direction: column; align-items: stretch; gap: var(--space-3); max-width: 380px">
+                <label style="display:flex; align-items:center; justify-content: space-between; gap: var(--space-4)">
+                  <span class="t-body">自动播放下一个</span>
+                  <span class="switch"><input type="checkbox" checked /><span class="switch-track"></span><span class="switch-thumb"></span></span>
+                </label>
+                <label style="display:flex; align-items:center; justify-content: space-between; gap: var(--space-4)">
+                  <span class="t-body">悬停预览静音</span>
+                  <span class="switch"><input type="checkbox" /><span class="switch-track"></span><span class="switch-thumb"></span></span>
+                </label>
+                <label style="display:flex; align-items:center; justify-content: space-between; gap: var(--space-4)">
+                  <span class="t-body">下载完成时通知</span>
+                  <span class="switch" data-size="lg"><input type="checkbox" checked /><span class="switch-track"></span><span class="switch-thumb"></span></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 08 Checkbox ────────────────────────────────────── -->
+        <section id="check" class="pr-section">
+          <header class="section-head">
+            <div class="num">08 · Checkbox</div>
+            <h2>复选</h2>
+            <p>多选场景、批量操作、表单同意条款。支持 indeterminate（"已选其中一些"）。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row" style="gap: var(--space-5)">
+              <label class="check"><input type="checkbox" /> 未勾选</label>
+              <label class="check"><input type="checkbox" checked /> 已勾选</label>
+              <label class="check"><input type="checkbox" id="indet"/> 部分选中</label>
+              <label class="check"><input type="checkbox" disabled /> 禁用</label>
+              <label class="check"><input type="checkbox" checked disabled /> 禁用已选</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 09 Radio ───────────────────────────────────────── -->
+        <section id="radio" class="pr-section">
+          <header class="section-head">
+            <div class="num">09 · Radio</div>
+            <h2>单选</h2>
+            <p>互斥选项。三个以下时用 radio，更多时改用 select。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row" style="gap: var(--space-5)">
+              <label class="radio"><input type="radio" name="r1" /> Dark</label>
+              <label class="radio"><input type="radio" name="r1" checked /> Light</label>
+              <label class="radio"><input type="radio" name="r1" /> Auto</label>
+              <label class="radio"><input type="radio" name="r2" disabled /> 禁用</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 10 Tooltip ─────────────────────────────────────── -->
+        <section id="tooltip" class="pr-section">
+          <header class="section-head">
+            <div class="num">10 · Tooltip</div>
+            <h2>气泡提示</h2>
+            <p>纯 CSS 实现，hover 350ms 后浮出。永远不替代必要的标签。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row">
+              <button class="icon-btn" data-tooltip="喜欢 · L">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </button>
+              <button class="btn" data-variant="secondary" data-tooltip="只在此设备上保存">本地</button>
+              <span class="t-body" data-tooltip="00:01:23.456">悬停我查看时间码</span>
+              <span class="kbd">⌘</span>
+              <span class="kbd">K</span>
+              <span class="t-caption t-secondary">键盘提示样式</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 11 Avatar ──────────────────────────────────────── -->
+        <section id="avatar" class="pr-section">
+          <header class="section-head">
+            <div class="num">11 · Avatar</div>
+            <h2>头像</h2>
+            <p>显示创作者头像，或在没有图时以首字母代替。永远是圆的——方形是合集封面，不是头像。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-grid">
+              <span class="lbl">Sizes</span>
+              <div class="demo-row">
+                <span class="avatar" data-size="sm">VW</span>
+                <span class="avatar">VEW</span>
+                <span class="avatar" data-size="lg">作</span>
+                <span class="avatar" data-size="xl">岚</span>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Stack</span>
+              <div class="demo-row">
+                <span class="avatar-stack">
+                  <span class="avatar">A</span>
+                  <span class="avatar">B</span>
+                  <span class="avatar">C</span>
+                  <span class="avatar t-caption" style="color: var(--text-tertiary)">+9</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 12 Divider ─────────────────────────────────────── -->
+        <section id="divider" class="pr-section">
+          <header class="section-head">
+            <div class="num">12 · Divider</div>
+            <h2>分隔</h2>
+            <p>能不用就不用——靠间距和层级分组永远更优。但需要的时候，它必须低到几乎看不见。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-grid">
+              <span class="lbl">Hairline (default)</span>
+              <hr class="divider" />
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Soft</span>
+              <hr class="divider" data-tone="soft" />
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Strong</span>
+              <hr class="divider" data-tone="strong" />
+            </div>
+            <div class="demo-grid">
+              <span class="lbl">Inline</span>
+              <div class="demo-row"><span class="t-secondary">设计</span><span class="divider-v"></span><span class="t-secondary">视频</span><span class="divider-v"></span><span class="t-secondary">VEW</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 13 Skeleton ────────────────────────────────────── -->
+        <section id="skel" class="pr-section">
+          <header class="section-head">
+            <div class="num">13 · Skeleton</div>
+            <h2>骨架屏</h2>
+            <p>媒体未到位时的呼吸——亮度差极小的横向 shimmer，1.6 秒一个循环。</p>
+          </header>
+          <div class="demo">
+            <div style="display:grid; grid-template-columns: 240px 1fr; gap: var(--space-4);">
+              <div class="skel" data-shape="media"></div>
+              <div style="display:grid; gap: 8px; align-content: start;">
+                <div class="skel" style="height: 18px; width: 70%;"></div>
+                <div class="skel" style="height: 14px; width: 45%;"></div>
+                <div class="skel" style="height: 14px; width: 30%; margin-top: 6px;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 14 Spinner ─────────────────────────────────────── -->
+        <section id="spin" class="pr-section">
+          <header class="section-head">
+            <div class="num">14 · Spinner</div>
+            <h2>载入</h2>
+            <p>用于按钮内、内联、覆层上。1.5px 细线，永远不是 4px 的粗块。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row" style="gap: var(--space-5); align-items: center;">
+              <span class="spinner"></span>
+              <span class="spinner" data-size="lg"></span>
+              <span class="spinner" data-tone="accent" data-size="lg"></span>
+              <span class="t-secondary t-small">正在解析视频源…</span>
+            </div>
+          </div>
+        </section>
+
+        <footer class="foot">
+          <span>VEW · Pass 1 · <span class="t-mono">primitives v0.1</span></span>
+          <span>← <a href="tokens.html">Tokens</a> · Next: Pass 2 Feedback &amp; Containers</span>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <script src="src/theme.js"></script>
+  <script src="src/i18n.js"></script>
+  <script>
+    // Theme & lang segments
+    function syncThemeSegment() {
+      const mode = document.documentElement.dataset.themeMode || 'dark';
+      document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.themeSet === mode ? 'true' : 'false'));
+    }
+    document.querySelectorAll('[data-theme-set]').forEach((b) => b.addEventListener('click', () => { window.VEWTheme.set(b.dataset.themeSet); syncThemeSegment(); }));
+    syncThemeSegment();
+
+    function syncLangSegment() {
+      const lang = window.VEWi18n?.getLang() || 'zh';
+      document.querySelectorAll('[data-lang-set]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.langSet === lang ? 'true' : 'false'));
+    }
+    document.querySelectorAll('[data-lang-set]').forEach((b) => b.addEventListener('click', async () => { await window.VEWi18n.setLang(b.dataset.langSet); syncLangSegment(); }));
+    window.addEventListener('vew:langchange', syncLangSegment);
+    setTimeout(syncLangSegment, 100);
+
+    // Selectable tags
+    document.querySelectorAll('#tag-selectable .tag').forEach((t) => {
+      t.addEventListener('click', () => {
+        t.dataset.selected = t.dataset.selected === 'true' ? 'false' : 'true';
+      });
+    });
+
+    // Indeterminate checkbox demo
+    const indet = document.getElementById('indet');
+    if (indet) indet.indeterminate = true;
+
+    // TOC active
+    (function () {
+      const links = document.querySelectorAll('[data-toc]');
+      const map = {}; links.forEach((l) => (map[l.dataset.toc] = l));
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove('active'));
+            const id = e.target.id;
+            if (map[id]) map[id].classList.add('active');
+          }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      ['button','iconbtn','tag','input','textarea','select','switch','check','radio','tooltip','avatar','divider','skel','spin'].forEach((id) => {
+        const el = document.getElementById(id); if (el) obs.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>

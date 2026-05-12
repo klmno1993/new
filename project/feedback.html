@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VEW · 反馈与容器</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,16..72,400;0,16..72,500;0,16..72,600;1,16..72,400&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="src/tokens.css" />
+  <link rel="stylesheet" href="src/primitives.css" />
+  <link rel="stylesheet" href="src/feedback.css" />
+
+  <style>
+    .shell { max-width: 1040px; margin: 0 auto; padding: var(--space-7) var(--space-6) var(--space-10); }
+    @media (min-width: 1280px) { .shell { padding-left: var(--space-8); padding-right: var(--space-8); } }
+
+    .topbar {
+      position: sticky; top: 0; z-index: var(--z-sticky);
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      background: color-mix(in oklch, var(--bg-canvas) 78%, transparent);
+      border-bottom: 1px solid var(--line-hairline);
+    }
+    .topbar-inner { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-6); height: 56px; }
+    .brand { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-mark { width: 24px; height: 24px; display: inline-flex; }
+    .brand-name { font-family: var(--font-ui); font-size: 17px; letter-spacing: -0.02em; font-weight: var(--weight-medium); }
+    .brand-divider { width: 1px; height: 16px; background: var(--line-soft); margin: 0 var(--space-3); }
+    .brand-section { font-size: var(--text-small); color: var(--text-secondary); letter-spacing: var(--tracking-wide); }
+
+    .controls { display: flex; align-items: center; gap: var(--space-3); }
+    .segment { display: inline-flex; align-items: center; padding: 2px; background: var(--bg-surface); border: 1px solid var(--line-hairline); border-radius: var(--radius-full); gap: 2px; }
+    .segment button { appearance: none; border: 0; cursor: pointer; padding: 4px 10px; font: inherit; font-size: var(--text-caption); line-height: 1; color: var(--text-secondary); background: transparent; border-radius: var(--radius-full); transition: color var(--duration-1) var(--ease-swift), background var(--duration-1) var(--ease-swift); }
+    .segment button:hover { color: var(--text-primary); }
+    .segment button[aria-pressed="true"] { background: var(--bg-raised); color: var(--text-primary); box-shadow: 0 0 0 1px var(--line-soft) inset; }
+    .top-back { color: var(--text-tertiary); text-decoration: none; font-size: var(--text-small); transition: color var(--duration-1) var(--ease-swift); }
+    .top-back:hover { color: var(--text-primary); }
+
+    .hero { padding-top: var(--space-7); padding-bottom: var(--space-7); border-bottom: 1px solid var(--line-hairline); }
+    .eyebrow { font-size: var(--text-micro); font-weight: var(--weight-medium); letter-spacing: var(--tracking-uppercase); text-transform: uppercase; color: var(--text-tertiary); margin-bottom: var(--space-4); }
+    .hero h1 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: clamp(34px, 4.5vw, 48px); line-height: 1.14; letter-spacing: var(--tracking-tight); margin: 0 0 var(--space-5); color: var(--text-primary); max-width: 26ch; }
+    .hero p { font-size: var(--text-lg); line-height: var(--lh-lg); color: var(--text-secondary); max-width: 62ch; margin: 0; }
+
+    section.pr-section { padding: var(--space-7) 0; border-bottom: 1px solid var(--line-hairline); }
+    section.pr-section:last-of-type { border-bottom: 0; }
+    .section-head { margin-bottom: var(--space-5); display: grid; gap: var(--space-2); }
+    .section-head .num { font-family: var(--font-mono); font-size: var(--text-caption); color: var(--text-tertiary); }
+    .section-head h2 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--text-h2); line-height: var(--lh-h2); letter-spacing: var(--tracking-tight); margin: 0; }
+    .section-head p { font-size: var(--text-body); color: var(--text-secondary); margin: 0; max-width: 60ch; }
+
+    .demo { background: var(--bg-surface); border: 1px solid var(--line-hairline); border-radius: var(--radius-md); padding: var(--space-5); display: grid; gap: var(--space-4); }
+    .demo-grid { display: grid; grid-template-columns: 140px 1fr; gap: var(--space-4); align-items: flex-start; }
+    .demo-grid .lbl { font-family: var(--font-mono); font-size: var(--text-caption); color: var(--text-tertiary); padding-top: 8px; }
+    .demo-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+    .demo-divide { height: 1px; background: var(--line-hairline); }
+
+    .layout { display: grid; grid-template-columns: 1fr; gap: var(--space-7); }
+    @media (min-width: 1100px) {
+      .layout { grid-template-columns: 200px 1fr; gap: var(--space-8); }
+      .toc { position: sticky; top: 80px; align-self: start; padding-top: var(--space-7); }
+    }
+    .toc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+    .toc-list a { display: grid; grid-template-columns: 28px 1fr; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); color: var(--text-tertiary); text-decoration: none; font-size: var(--text-small); transition: color var(--duration-1) var(--ease-swift), background var(--duration-1) var(--ease-swift); }
+    .toc-list a:hover { color: var(--text-primary); background: var(--bg-surface); }
+    .toc-list a .n { font-family: var(--font-mono); font-size: 10px; color: var(--text-disabled); }
+    .toc-list a.active { color: var(--text-primary); }
+    .toc-list a.active .n { color: var(--accent); }
+
+    .foot { padding-top: var(--space-7); padding-bottom: var(--space-4); display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; color: var(--text-tertiary); font-size: var(--text-small); }
+    .foot a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--line-soft); transition: color var(--duration-1) var(--ease-swift); }
+    .foot a:hover { color: var(--text-primary); }
+
+    .brand-svg .l-wing { fill: var(--text-primary); }
+    .brand-svg .r-wing { fill: var(--text-primary); opacity: 0.32; }
+
+    /* Static preview frames — show internal surfaces without triggering real overlays */
+    .preview-frame {
+      position: relative;
+      min-height: 280px;
+      background:
+        radial-gradient(120% 80% at 50% 0%, color-mix(in oklch, var(--accent) 8%, transparent) 0%, transparent 50%),
+        var(--bg-sunken);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .preview-frame.tall { min-height: 460px; }
+    .preview-frame .corner-label {
+      position: absolute; top: var(--space-3); left: var(--space-4);
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-tertiary); letter-spacing: var(--tracking-uppercase); text-transform: uppercase;
+    }
+
+    /* For embedded popovers/menus in preview (no JS positioning) */
+    .preview-anchor {
+      position: relative;
+      display: inline-block;
+    }
+    .preview-anchor .static-pop {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Static drawer preview rendered inside a relative frame */
+    .preview-frame .static-drawer {
+      position: absolute; top: 0; right: 0; bottom: 0;
+      width: 360px;
+      animation: none;
+    }
+    .preview-frame .static-drawer[data-side="bottom"] {
+      top: auto; left: 0; right: 0; width: 100%;
+      animation: none;
+    }
+    .preview-frame .static-scrim {
+      position: absolute; inset: 0;
+      background: oklch(0 0 0 / 0.30);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      animation: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand mark -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="vew-mark" viewBox="0 0 120 120">
+        <path class="l-wing" d="M27 22 Q26 18 30 18 L40 18 Q43 18 44 21 L62 86 Q62.5 89 60 89 L52 89 Q49 89 48 86 L27 22 Z"/>
+        <path class="r-wing" d="M93 22 Q94 18 90 18 L80 18 Q77 18 76 21 L58 86 Q57.5 89 60 89 L68 89 Q71 89 72 86 L93 22 Z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <svg class="brand-mark brand-svg" aria-hidden="true"><use href="#vew-mark"/></svg>
+        <span class="brand-name">VEW</span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-section">反馈与容器</span>
+      </div>
+      <div class="controls">
+        <a href="tokens.html" class="top-back">Tokens</a>
+        <a href="primitives.html" class="top-back">← Primitives</a>
+        <div class="segment" role="group" aria-label="Theme">
+          <button data-theme-set="dark">暗</button>
+          <button data-theme-set="light">亮</button>
+          <button data-theme-set="auto">跟随</button>
+        </div>
+        <div class="segment" role="group" aria-label="Language">
+          <button data-lang-set="zh">中</button>
+          <button data-lang-set="en">EN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Pass 02 · Feedback &amp; Containers</div>
+      <h1>水面之下的礼仪。</h1>
+      <p>系统向你说话的方式，与你向系统下指令的方式——所有 Toast、Dialog、Drawer、Popover、Menu，以及空与错。它们出现的时刻应当被察觉，离开的时刻不留痕。</p>
+    </section>
+
+    <div class="layout">
+      <aside class="toc">
+        <ul class="toc-list">
+          <li><a href="#toast"    data-toc="toast"><span class="n">01</span><span>Toast</span></a></li>
+          <li><a href="#noti"     data-toc="noti"><span class="n">02</span><span>Notification</span></a></li>
+          <li><a href="#alert"    data-toc="alert"><span class="n">03</span><span>Alert</span></a></li>
+          <li><a href="#dialog"   data-toc="dialog"><span class="n">04</span><span>Dialog</span></a></li>
+          <li><a href="#confirm"  data-toc="confirm"><span class="n">05</span><span>Confirm</span></a></li>
+          <li><a href="#drawer"   data-toc="drawer"><span class="n">06</span><span>Drawer</span></a></li>
+          <li><a href="#popover"  data-toc="popover"><span class="n">07</span><span>Popover</span></a></li>
+          <li><a href="#menu"     data-toc="menu"><span class="n">08</span><span>Menu</span></a></li>
+          <li><a href="#empty"    data-toc="empty"><span class="n">09</span><span>Empty / Error</span></a></li>
+          <li><a href="#auth"     data-toc="auth"><span class="n">10</span><span>Auth</span></a></li>
+        </ul>
+      </aside>
+
+      <div class="content">
+
+        <!-- ── 01 Toast ──────────────────────────────────────── -->
+        <section id="toast" class="pr-section">
+          <header class="section-head">
+            <div class="num">01 · Toast</div>
+            <h2>瞬时提示</h2>
+            <p>从右上滑入，4 秒后自行消退，可被悬停暂停。底部一根细线告诉你它什么时候会走。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row">
+              <button class="btn" data-variant="secondary" id="toast-info">默认</button>
+              <button class="btn" data-variant="secondary" id="toast-success">成功</button>
+              <button class="btn" data-variant="secondary" id="toast-warn">警告</button>
+              <button class="btn" data-variant="secondary" id="toast-danger">错误</button>
+              <button class="btn" data-variant="secondary" id="toast-action">含操作</button>
+            </div>
+          </div>
+
+          <!-- Static preview of all tones in one frame -->
+          <div class="preview-frame" style="margin-top: var(--space-4); justify-content: flex-end; flex-direction: column; align-items: stretch; padding: var(--space-7) var(--space-5);">
+            <div class="corner-label">Static preview</div>
+            <div style="display: grid; gap: var(--space-3); max-width: 340px; margin-left: auto;">
+              <div class="toast" data-tone="info" style="animation: none;">
+                <span class="toast-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>
+                <div class="toast-body">
+                  <div class="toast-title">视频源已刷新</div>
+                  <div class="toast-msg">检测到 3 个新分辨率。</div>
+                </div>
+                <button class="toast-close" aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+                <span class="toast-progress" style="width: 60%;"></span>
+              </div>
+              <div class="toast" data-tone="success" style="animation: none;">
+                <span class="toast-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></span>
+                <div class="toast-body">
+                  <div class="toast-title">已加入"夜晚摄影"</div>
+                  <div class="toast-msg">该合集现在有 27 个视频。</div>
+                </div>
+                <button class="toast-action">撤销</button>
+                <span class="toast-progress" style="width: 30%;"></span>
+              </div>
+              <div class="toast" data-tone="warning" style="animation: none;">
+                <span class="toast-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+                <div class="toast-body">
+                  <div class="toast-title">代理连接较慢</div>
+                  <div class="toast-msg">解析可能延迟。</div>
+                </div>
+                <button class="toast-close" aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+              </div>
+              <div class="toast" data-tone="danger" style="animation: none;">
+                <span class="toast-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span>
+                <div class="toast-body">
+                  <div class="toast-title">下载失败</div>
+                  <div class="toast-msg">源已失效。请刷新或更换源。</div>
+                </div>
+                <button class="toast-action">重试</button>
+                <span class="toast-progress"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 02 Notification ──────────────────────────────── -->
+        <section id="noti" class="pr-section">
+          <header class="section-head">
+            <div class="num">02 · Notification</div>
+            <h2>通知列表</h2>
+            <p>常驻于顶栏右侧。未读的小点是唯一的视觉强调——不要红色徽章。整组通常装在 Popover 里。</p>
+          </header>
+          <div class="demo">
+            <div style="background: var(--bg-overlay); border: 1px solid var(--line-soft); border-radius: var(--radius-md); box-shadow: var(--shadow-2); max-width: 380px; overflow: hidden;">
+              <div class="popover-header" style="border-color: var(--line-hairline);">
+                <span class="popover-title">通知</span>
+                <a href="#" class="t-caption" style="color: var(--text-secondary); text-decoration: none;">全部标为已读</a>
+              </div>
+              <div>
+                <div class="noti-item" data-unread="true">
+                  <span class="noti-dot"></span>
+                  <div class="noti-body">
+                    <div class="noti-title">下载完成 · 春日的傍晚</div>
+                    <div class="noti-msg">来自 YouTube · 1.2GB · 已存入"摄影灵感"</div>
+                  </div>
+                  <span class="noti-time">刚刚</span>
+                </div>
+                <div class="noti-item" data-unread="true">
+                  <span class="noti-dot"></span>
+                  <div class="noti-body">
+                    <div class="noti-title">检测到新分辨率</div>
+                    <div class="noti-msg">"街头采访 03" 现在有 4K 源。</div>
+                  </div>
+                  <span class="noti-time">3 分钟</span>
+                </div>
+                <div class="noti-item">
+                  <span class="noti-dot"></span>
+                  <div class="noti-body">
+                    <div class="noti-title">合集"动效"已更新</div>
+                    <div class="noti-msg">12 个视频被自动加入。</div>
+                  </div>
+                  <span class="noti-time">2 小时</span>
+                </div>
+                <div class="noti-item">
+                  <span class="noti-dot"></span>
+                  <div class="noti-body">
+                    <div class="noti-title">代理连接已恢复</div>
+                  </div>
+                  <span class="noti-time">昨日</span>
+                </div>
+              </div>
+              <div class="popover-footer" style="justify-content: center;">
+                <a href="#" class="t-caption" style="color: var(--text-secondary); text-decoration: none;">查看全部通知</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 03 Alert ──────────────────────────────────────── -->
+        <section id="alert" class="pr-section">
+          <header class="section-head">
+            <div class="num">03 · Alert</div>
+            <h2>内联横幅</h2>
+            <p>不像 Toast 那样飘过即逝。横幅留在原地，因为它对当前上下文重要——比如"代理未配置"或"该视频源已失效"。</p>
+          </header>
+          <div class="demo">
+            <div class="alert" data-tone="info">
+              <span class="alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>
+              <div class="alert-body">
+                <div class="alert-title">首次解析需要配置代理</div>
+                <div class="alert-msg">前往 设置 · 代理 完成配置。VEW 不会上传你的视频。</div>
+              </div>
+              <button class="btn" data-variant="ghost" data-size="sm">前往设置</button>
+            </div>
+            <div class="alert" data-tone="success">
+              <span class="alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></span>
+              <div class="alert-body">
+                <div class="alert-title">导入完成</div>
+                <div class="alert-msg">128 个视频已加入收藏，其中 12 个为重复，已自动合并。</div>
+              </div>
+            </div>
+            <div class="alert" data-tone="warning">
+              <span class="alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+              <div class="alert-body">
+                <div class="alert-title">该视频的源已 3 周未刷新</div>
+                <div class="alert-msg">部分平台会定期失效原始链接。</div>
+              </div>
+              <button class="btn" data-variant="secondary" data-size="sm">立即刷新</button>
+            </div>
+            <div class="alert" data-tone="danger">
+              <span class="alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span>
+              <div class="alert-body">
+                <div class="alert-title">解析器 yt-dlp 报错</div>
+                <div class="alert-msg">退出码 1 · 查看完整日志以排查。</div>
+              </div>
+              <button class="btn" data-variant="ghost" data-size="sm">查看日志</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 04 Dialog ─────────────────────────────────────── -->
+        <section id="dialog" class="pr-section">
+          <header class="section-head">
+            <div class="num">04 · Dialog</div>
+            <h2>对话框</h2>
+            <p>用于需要明确"确认或放弃"的中等任务——编辑元数据、批量打标签、添加视频。比页面轻，比抽屉小。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row">
+              <button class="btn" data-variant="primary" id="open-dialog">打开 · 编辑视频</button>
+              <button class="btn" data-variant="secondary" id="open-dialog-add">打开 · 添加视频</button>
+            </div>
+          </div>
+
+          <!-- Static preview -->
+          <div class="preview-frame tall" style="margin-top: var(--space-4);">
+            <div class="corner-label">Static preview · Edit metadata</div>
+            <div class="dialog" data-size="md" style="animation: none;">
+              <header class="dialog-header">
+                <div>
+                  <div class="dialog-eyebrow">编辑视频</div>
+                  <h3 class="dialog-title">春日的傍晚 · 街头摄影</h3>
+                </div>
+                <button class="dialog-close" aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+              </header>
+              <div class="dialog-body" style="display: grid; gap: var(--space-4);">
+                <div class="field">
+                  <label class="field-label">标题</label>
+                  <div class="input-wrap"><input class="input" value="春日的傍晚 · 街头摄影" /></div>
+                </div>
+                <div class="field">
+                  <label class="field-label">备注</label>
+                  <textarea class="textarea" placeholder="为什么收藏这个…">1:23 的转场配上鸟鸣绝了。</textarea>
+                </div>
+                <div class="field">
+                  <label class="field-label">标签</label>
+                  <div class="demo-row" style="gap: var(--space-2);">
+                    <span class="tag" data-shape="pill">摄影<span class="tag-close" role="button">×</span></span>
+                    <span class="tag" data-shape="pill">街头<span class="tag-close" role="button">×</span></span>
+                    <span class="tag" data-shape="pill">日落<span class="tag-close" role="button">×</span></span>
+                    <span class="tag" data-shape="pill" data-selectable="true">+ 添加</span>
+                  </div>
+                </div>
+              </div>
+              <footer class="dialog-footer">
+                <button class="btn" data-variant="ghost">取消</button>
+                <button class="btn" data-variant="primary">保存</button>
+              </footer>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 05 Confirm ───────────────────────────────────── -->
+        <section id="confirm" class="pr-section">
+          <header class="section-head">
+            <div class="num">05 · Confirm</div>
+            <h2>确认</h2>
+            <p>破坏性动作的最后一关。语气克制、信息明确——不咆哮，但不能错。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row">
+              <button class="btn" data-variant="danger" id="open-confirm">删除该视频…</button>
+              <button class="btn" data-variant="secondary" id="open-confirm-warn">清空已读通知…</button>
+            </div>
+          </div>
+
+          <div class="preview-frame" style="margin-top: var(--space-4);">
+            <div class="corner-label">Static preview</div>
+            <div class="dialog" data-variant="confirm" data-tone="danger" data-size="sm" style="animation: none;">
+              <header class="dialog-header">
+                <span class="confirm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></span>
+                <div>
+                  <h3 class="dialog-title" style="font-family: var(--font-ui); font-size: var(--text-lg); line-height: var(--lh-lg);">删除该视频？</h3>
+                </div>
+                <button class="dialog-close" aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+              </header>
+              <div class="dialog-body" style="font-size: var(--text-small); padding-top: var(--space-1); padding-left: calc(var(--space-5) + 32px + var(--space-3));">
+                这将同时移除该视频的所有源、缩略图、备注与时间戳。<strong style="color: var(--text-primary); font-weight: var(--weight-medium);">此操作可在 7 天内从回收站恢复。</strong>
+              </div>
+              <footer class="dialog-footer">
+                <button class="btn" data-variant="ghost">取消</button>
+                <button class="btn" data-variant="danger-solid">删除</button>
+              </footer>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 06 Drawer ─────────────────────────────────────── -->
+        <section id="drawer" class="pr-section">
+          <header class="section-head">
+            <div class="num">06 · Drawer / Sheet</div>
+            <h2>抽屉与底栏</h2>
+            <p>承担"侧边任务面板"——视频详情侧边栏、设置子页、批量操作工作台。桌面右抽屉，移动底栏。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row">
+              <button class="btn" data-variant="primary" id="open-drawer">打开右抽屉 · 视频详情</button>
+              <button class="btn" data-variant="secondary" id="open-sheet">打开底栏 · 批量操作</button>
+            </div>
+          </div>
+
+          <div class="preview-frame tall" style="margin-top: var(--space-4); padding: 0;">
+            <div class="corner-label">Static preview · Drawer</div>
+            <div class="static-scrim"></div>
+            <div class="static-drawer drawer">
+              <header class="drawer-header">
+                <h3 class="drawer-title">视频详情</h3>
+                <button class="icon-btn" data-size="sm" aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+              </header>
+              <div class="drawer-body" style="display: grid; gap: var(--space-4);">
+                <div style="aspect-ratio: 16/9; background: var(--media-placeholder); border-radius: var(--radius-md); position: relative; overflow: hidden;">
+                  <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 40%, oklch(0.4 0.04 240) 0%, oklch(0.22 0.02 250) 70%);"></div>
+                  <span class="tag t-mono" style="position:absolute; bottom: 8px; right: 8px; background: oklch(0 0 0 / 0.6); color: oklch(0.95 0 0); border-color: transparent;">12:34</span>
+                </div>
+                <div>
+                  <div class="t-eyebrow" style="margin-bottom: 6px;">YouTube · 4 月 12 日</div>
+                  <h4 style="font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--text-title); line-height: var(--lh-title); margin: 0 0 var(--space-2);">春日的傍晚 · 街头摄影</h4>
+                  <div class="t-small t-secondary">岚野 — 33 个视频</div>
+                </div>
+                <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+                  <span class="tag">摄影</span>
+                  <span class="tag">街头</span>
+                  <span class="tag">日落</span>
+                </div>
+                <p class="t-body t-secondary" style="margin: 0;">1:23 的转场配上鸟鸣绝了。光线的处理也值得反复看。</p>
+              </div>
+              <footer class="drawer-footer">
+                <button class="btn" data-variant="ghost">访问原网页</button>
+                <button class="btn" data-variant="primary">播放</button>
+              </footer>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 07 Popover ────────────────────────────────────── -->
+        <section id="popover" class="pr-section">
+          <header class="section-head">
+            <div class="num">07 · Popover</div>
+            <h2>气泡面板</h2>
+            <p>比 Tooltip 大、比 Dialog 小。承载小型表单、快速操作或临时信息——如"加入合集"。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row">
+              <div class="preview-anchor">
+                <button class="btn" data-variant="secondary">加入合集 ▾</button>
+                <div class="popover static-pop" style="animation: none; min-width: 240px;">
+                  <div class="popover-header">
+                    <span class="popover-title">加入合集</span>
+                    <button class="icon-btn" data-size="sm" aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+                  </div>
+                  <div class="popover-body" style="display: grid; gap: var(--space-3);">
+                    <div class="input-wrap" data-size="sm">
+                      <span class="input-prefix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3" stroke-linecap="round"/></svg></span>
+                      <input class="input" placeholder="搜索合集…" />
+                    </div>
+                    <div style="display: grid; gap: var(--space-1); max-height: 160px; overflow-y: auto;">
+                      <label class="check"><input type="checkbox" checked /> 摄影灵感</label>
+                      <label class="check"><input type="checkbox" /> 动效收藏</label>
+                      <label class="check"><input type="checkbox" /> 访谈合辑</label>
+                      <label class="check"><input type="checkbox" /> 待看</label>
+                    </div>
+                  </div>
+                  <div class="popover-footer">
+                    <button class="btn" data-variant="ghost" data-size="sm">+ 新建合集</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 08 Menu ──────────────────────────────────────── -->
+        <section id="menu" class="pr-section">
+          <header class="section-head">
+            <div class="num">08 · Menu</div>
+            <h2>下拉菜单</h2>
+            <p>视频卡的"更多"出口、顶栏的用户菜单、右键菜单——同一个组件，承担所有"次操作"集合。</p>
+          </header>
+          <div class="demo">
+            <div class="demo-row" style="gap: var(--space-7); align-items: flex-start;">
+              <!-- Video card more menu -->
+              <div class="preview-anchor">
+                <button class="icon-btn" aria-label="more"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+                <div class="menu static-pop" style="animation: none;">
+                  <div class="menu-label">视频</div>
+                  <button class="menu-item">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+                    <span>编辑信息</span>
+                    <span class="mi-hint">E</span>
+                  </button>
+                  <button class="menu-item">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+                    <span>加入合集…</span>
+                    <span class="mi-hint">C</span>
+                  </button>
+                  <button class="menu-item">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+                    <span>刷新源</span>
+                  </button>
+                  <button class="menu-item">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+                    <span>访问原网页</span>
+                  </button>
+                  <div class="menu-sep"></div>
+                  <button class="menu-item">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                    <span>复制链接</span>
+                    <span class="mi-hint">⌘C</span>
+                  </button>
+                  <button class="menu-item" data-tone="danger">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></span>
+                    <span>删除</span>
+                    <span class="mi-hint">⌫</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Sort menu (with active check) -->
+              <div class="preview-anchor">
+                <button class="btn" data-variant="secondary">排序 · 最近添加 ▾</button>
+                <div class="menu static-pop" style="animation: none; min-width: 220px;">
+                  <div class="menu-label">排序方式</div>
+                  <button class="menu-item" data-active="true">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span>最近添加</span>
+                  </button>
+                  <button class="menu-item">
+                    <span class="mi-icon"></span>
+                    <span>最近观看</span>
+                  </button>
+                  <button class="menu-item">
+                    <span class="mi-icon"></span>
+                    <span>标题</span>
+                  </button>
+                  <button class="menu-item">
+                    <span class="mi-icon"></span>
+                    <span>时长</span>
+                  </button>
+                  <div class="menu-sep"></div>
+                  <button class="menu-item">
+                    <span class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 3l4 4-4 4M3 7h18M7 13l-4 4 4 4M21 17H3"/></svg></span>
+                    <span>方向：降序</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 09 Empty / Error ─────────────────────────────── -->
+        <section id="empty" class="pr-section">
+          <header class="section-head">
+            <div class="num">09 · Empty &amp; Error</div>
+            <h2>空与错</h2>
+            <p>不放卡通插画。一个低对比的图形 + 一句温和的文案 + 一个明确的出口。失败的态度要从容，不卑不亢。</p>
+          </header>
+          <div class="demo" style="grid-template-columns: 1fr 1fr; display: grid; gap: var(--space-4); padding: 0; background: transparent; border: 0;">
+
+            <div class="preview-frame">
+              <div class="corner-label">Empty · Collection</div>
+              <div class="state">
+                <span class="state-art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+                <h3 class="state-title">这个合集还空着</h3>
+                <p class="state-body">从任何视频卡的"更多"菜单里把它加进来——或者粘贴一个链接。</p>
+                <div class="state-actions">
+                  <button class="btn" data-variant="primary">+ 添加视频</button>
+                  <button class="btn" data-variant="ghost">了解合集</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-frame">
+              <div class="corner-label">Empty · Search</div>
+              <div class="state">
+                <span class="state-art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg></span>
+                <h3 class="state-title">没有匹配"幻灯"</h3>
+                <p class="state-body">试试别的关键词，或者按创作者、标签筛选。</p>
+                <div class="state-actions">
+                  <button class="btn" data-variant="secondary">清除关键词</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-frame">
+              <div class="corner-label">Error · Source</div>
+              <div class="state" data-tone="danger">
+                <span class="state-art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span>
+                <h3 class="state-title">视频源暂时打不开</h3>
+                <p class="state-body">代理可能挂了，也可能是原平台限制。你的本地数据安然无恙。</p>
+                <div class="state-actions">
+                  <button class="btn" data-variant="primary">重试</button>
+                  <button class="btn" data-variant="ghost">查看日志</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-frame">
+              <div class="corner-label">First-run</div>
+              <div class="state">
+                <svg class="brand-svg" viewBox="0 0 120 120" style="width: 64px; height: 64px; margin-bottom: var(--space-3);"><use href="#vew-mark"/></svg>
+                <h3 class="state-title">欢迎来到 VEW</h3>
+                <p class="state-body">把你第一个珍藏的视频链接粘贴进来——剩下的我们替你打理。</p>
+                <div class="state-actions">
+                  <div class="input-wrap" style="width: 300px;">
+                    <input class="input" placeholder="粘贴视频链接…" />
+                  </div>
+                  <button class="btn" data-variant="primary">添加</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── 10 Auth ──────────────────────────────────────── -->
+        <section id="auth" class="pr-section">
+          <header class="section-head">
+            <div class="num">10 · Auth</div>
+            <h2>登录</h2>
+            <p>VEW 是私人的，但仍然需要一道门。门要朴素——没有"立即开始"的炫目按钮，没有第三方登录的杂讯。一张表，一个回车。</p>
+          </header>
+
+          <div class="preview-frame tall" style="padding: var(--space-7); align-items: flex-start;">
+            <div class="corner-label">Login</div>
+            <div style="margin-top: var(--space-5); display: grid; place-items: center; width: 100%;">
+              <div class="auth-card">
+                <header class="auth-head">
+                  <svg class="auth-mark brand-svg" viewBox="0 0 120 120"><use href="#vew-mark"/></svg>
+                  <h1 class="auth-title">欢迎回来</h1>
+                  <p class="auth-sub">登录你的 VEW 实例</p>
+                </header>
+                <form class="auth-form" onsubmit="return false;">
+                  <div class="field">
+                    <label class="field-label">用户名</label>
+                    <div class="input-wrap"><input class="input" placeholder="vew" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label">密码</label>
+                    <div class="input-wrap"><input class="input" type="password" value="" /></div>
+                  </div>
+                  <div class="auth-row">
+                    <label class="check"><input type="checkbox" /> 保持登录 30 天</label>
+                    <a href="#" class="auth-link">忘记？</a>
+                  </div>
+                  <button class="btn" data-variant="primary" data-size="lg" style="width: 100%;">登录</button>
+                </form>
+                <div class="auth-foot">
+                  首次使用？<a href="#" class="auth-link" style="margin-left: 6px;">完成系统初始化</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="foot">
+          <span>VEW · Pass 2 · <span class="t-mono">feedback v0.1</span></span>
+          <span>← <a href="primitives.html">Primitives</a> · Next: Pass 3 Domain Components</span>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <!-- Live overlay mount points -->
+  <div id="toast-host" class="toast-stack"></div>
+  <div id="overlay-host"></div>
+
+  <script src="src/theme.js"></script>
+  <script src="src/i18n.js"></script>
+  <script>
+    /* ── Theme & lang segments ─────────────────────────────── */
+    function syncThemeSegment() {
+      const mode = document.documentElement.dataset.themeMode || 'dark';
+      document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.themeSet === mode ? 'true' : 'false'));
+    }
+    document.querySelectorAll('[data-theme-set]').forEach((b) => b.addEventListener('click', () => { window.VEWTheme.set(b.dataset.themeSet); syncThemeSegment(); }));
+    syncThemeSegment();
+
+    function syncLangSegment() {
+      const lang = window.VEWi18n?.getLang() || 'zh';
+      document.querySelectorAll('[data-lang-set]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.langSet === lang ? 'true' : 'false'));
+    }
+    document.querySelectorAll('[data-lang-set]').forEach((b) => b.addEventListener('click', async () => { await window.VEWi18n.setLang(b.dataset.langSet); syncLangSegment(); }));
+    window.addEventListener('vew:langchange', syncLangSegment);
+    setTimeout(syncLangSegment, 100);
+
+    /* ── TOC active ────────────────────────────────────────── */
+    (function () {
+      const links = document.querySelectorAll('[data-toc]');
+      const map = {}; links.forEach((l) => (map[l.dataset.toc] = l));
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove('active'));
+            const id = e.target.id;
+            if (map[id]) map[id].classList.add('active');
+          }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      ['toast','noti','alert','dialog','confirm','drawer','popover','menu','empty','auth'].forEach((id) => {
+        const el = document.getElementById(id); if (el) obs.observe(el);
+      });
+    })();
+
+    /* ── Toast system ──────────────────────────────────────── */
+    const TOAST_HOST = document.getElementById('toast-host');
+    const ICON = {
+      info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+      success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>',
+      warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+      danger:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+    };
+    const CLOSE_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg>';
+
+    function toast({ tone = 'info', title, msg, action, duration = 4000 } = {}) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.dataset.tone = tone;
+      t.innerHTML = `
+        <span class="toast-icon">${ICON[tone] || ICON.info}</span>
+        <div class="toast-body">
+          <div class="toast-title">${title || ''}</div>
+          ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
+        </div>
+        ${action ? `<button class="toast-action">${action.label}</button>` : `<button class="toast-close" aria-label="close">${CLOSE_X}</button>`}
+        <span class="toast-progress"></span>
+      `;
+      const progress = t.querySelector('.toast-progress');
+      progress.style.width = '100%';
+      progress.style.transition = `width ${duration}ms linear`;
+      requestAnimationFrame(() => { progress.style.width = '0%'; });
+
+      const dismiss = () => {
+        t.dataset.leaving = 'true';
+        t.addEventListener('animationend', () => t.remove(), { once: true });
+      };
+      let timer = setTimeout(dismiss, duration);
+      t.addEventListener('mouseenter', () => {
+        clearTimeout(timer);
+        const cs = getComputedStyle(progress);
+        progress.style.transition = 'none';
+        progress.style.width = cs.width;
+      });
+      t.addEventListener('mouseleave', () => {
+        const remain = Math.max(800, parseFloat(progress.style.width) / 100 * duration);
+        progress.style.transition = `width ${remain}ms linear`;
+        requestAnimationFrame(() => { progress.style.width = '0%'; });
+        timer = setTimeout(dismiss, remain);
+      });
+      const closeBtn = t.querySelector('.toast-close');
+      if (closeBtn) closeBtn.addEventListener('click', dismiss);
+      const actionBtn = t.querySelector('.toast-action');
+      if (actionBtn && action) actionBtn.addEventListener('click', () => { action.onClick && action.onClick(); dismiss(); });
+
+      TOAST_HOST.appendChild(t);
+      return dismiss;
+    }
+    document.getElementById('toast-info').addEventListener('click', () => toast({ tone: 'info', title: '视频源已刷新', msg: '检测到 3 个新分辨率。' }));
+    document.getElementById('toast-success').addEventListener('click', () => toast({ tone: 'success', title: '已加入"夜晚摄影"', msg: '该合集现在有 27 个视频。' }));
+    document.getElementById('toast-warn').addEventListener('click', () => toast({ tone: 'warning', title: '代理连接较慢', msg: '解析可能延迟。' }));
+    document.getElementById('toast-danger').addEventListener('click', () => toast({ tone: 'danger', title: '下载失败', msg: '源已失效。请刷新或更换源。' }));
+    document.getElementById('toast-action').addEventListener('click', () => toast({ tone: 'success', title: '已删除 12 个视频', action: { label: '撤销', onClick: () => toast({ tone: 'info', title: '已恢复。' }) }, duration: 6000 }));
+
+    /* ── Overlay (Dialog/Drawer) system ────────────────────── */
+    const OVERLAY = document.getElementById('overlay-host');
+    function mountScrim(content) {
+      const scrim = document.createElement('div');
+      scrim.className = 'scrim';
+      scrim.appendChild(content);
+      OVERLAY.appendChild(scrim);
+      const close = () => {
+        scrim.dataset.closing = 'true';
+        scrim.addEventListener('animationend', () => scrim.remove(), { once: true });
+        window.removeEventListener('keydown', onKey);
+      };
+      function onKey(e) { if (e.key === 'Escape') close(); }
+      window.addEventListener('keydown', onKey);
+      scrim.addEventListener('click', (e) => { if (e.target === scrim) close(); });
+      return close;
+    }
+
+    function openDialog({ title, eyebrow, body, footer, size = 'md', variant, tone, icon }) {
+      const d = document.createElement('div');
+      d.className = 'dialog';
+      d.dataset.size = size;
+      if (variant) d.dataset.variant = variant;
+      if (tone)    d.dataset.tone = tone;
+      d.innerHTML = `
+        <header class="dialog-header">
+          ${variant === 'confirm' ? `<span class="confirm-icon">${icon || ''}</span>` : ''}
+          <div>
+            ${eyebrow ? `<div class="dialog-eyebrow">${eyebrow}</div>` : ''}
+            <h3 class="dialog-title" ${variant === 'confirm' ? 'style="font-family:var(--font-ui);font-size:var(--text-lg);line-height:var(--lh-lg);"' : ''}>${title}</h3>
+          </div>
+          <button class="dialog-close" aria-label="close">${CLOSE_X}</button>
+        </header>
+        <div class="dialog-body" ${variant === 'confirm' ? 'style="padding-top:var(--space-1);padding-left:calc(var(--space-5) + 32px + var(--space-3));font-size:var(--text-small);"' : ''}>${body || ''}</div>
+        <footer class="dialog-footer">${footer || ''}</footer>
+      `;
+      const close = mountScrim(d);
+      d.querySelector('.dialog-close').addEventListener('click', close);
+      d.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
+      return close;
+    }
+
+    document.getElementById('open-dialog').addEventListener('click', () => {
+      openDialog({
+        eyebrow: '编辑视频',
+        title: '春日的傍晚 · 街头摄影',
+        size: 'md',
+        body: `
+          <div style="display:grid; gap: var(--space-4);">
+            <div class="field"><label class="field-label">标题</label><div class="input-wrap"><input class="input" value="春日的傍晚 · 街头摄影" /></div></div>
+            <div class="field"><label class="field-label">备注</label><textarea class="textarea">1:23 的转场配上鸟鸣绝了。</textarea></div>
+            <div class="field"><label class="field-label">标签</label>
+              <div style="display:flex; flex-wrap:wrap; gap: var(--space-2);">
+                <span class="tag" data-shape="pill">摄影<span class="tag-close" role="button">×</span></span>
+                <span class="tag" data-shape="pill">街头<span class="tag-close" role="button">×</span></span>
+                <span class="tag" data-shape="pill" data-selectable="true">+ 添加</span>
+              </div>
+            </div>
+          </div>
+        `,
+        footer: `<button class="btn" data-variant="ghost" data-close>取消</button><button class="btn" data-variant="primary" data-close>保存</button>`,
+      });
+    });
+
+    document.getElementById('open-dialog-add').addEventListener('click', () => {
+      openDialog({
+        eyebrow: '添加视频',
+        title: '粘贴一个链接，VEW 来打理。',
+        size: 'sm',
+        body: `
+          <div style="display:grid; gap: var(--space-3);">
+            <div class="input-wrap"><input class="input" placeholder="https://…" /></div>
+            <p class="t-small t-tertiary" style="margin:0;">支持 YouTube · Bilibili · Vimeo · Twitter · 以及通过插件接入的更多平台。</p>
+          </div>
+        `,
+        footer: `<button class="btn" data-variant="ghost" data-close>取消</button><button class="btn" data-variant="primary" data-close>添加</button>`,
+      });
+    });
+
+    document.getElementById('open-confirm').addEventListener('click', () => {
+      openDialog({
+        variant: 'confirm', tone: 'danger', size: 'sm',
+        title: '删除该视频？',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+        body: '这将同时移除该视频的所有源、缩略图、备注与时间戳。<strong style="color: var(--text-primary); font-weight: var(--weight-medium);">此操作可在 7 天内从回收站恢复。</strong>',
+        footer: `<button class="btn" data-variant="ghost" data-close>取消</button><button class="btn" data-variant="danger-solid" data-close>删除</button>`,
+      });
+    });
+
+    document.getElementById('open-confirm-warn').addEventListener('click', () => {
+      openDialog({
+        variant: 'confirm', tone: 'warning', size: 'sm',
+        title: '清空所有已读通知？',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+        body: '未读通知会被保留。该操作无法撤销。',
+        footer: `<button class="btn" data-variant="ghost" data-close>取消</button><button class="btn" data-variant="primary" data-close>确认清空</button>`,
+      });
+    });
+
+    /* Drawers */
+    function openDrawer({ side = 'right', size = 'md', content }) {
+      const scrim = document.createElement('div');
+      scrim.className = 'drawer-scrim';
+      const drawer = document.createElement('div');
+      drawer.className = 'drawer';
+      drawer.dataset.side = side;
+      drawer.dataset.size = size;
+      drawer.innerHTML = content;
+      OVERLAY.appendChild(scrim);
+      OVERLAY.appendChild(drawer);
+      const close = () => {
+        scrim.dataset.closing = 'true';
+        drawer.dataset.closing = 'true';
+        drawer.addEventListener('animationend', () => { scrim.remove(); drawer.remove(); }, { once: true });
+        window.removeEventListener('keydown', onKey);
+      };
+      function onKey(e) { if (e.key === 'Escape') close(); }
+      window.addEventListener('keydown', onKey);
+      scrim.addEventListener('click', close);
+      drawer.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
+      return close;
+    }
+
+    document.getElementById('open-drawer').addEventListener('click', () => {
+      openDrawer({ side: 'right', content: `
+        <header class="drawer-header">
+          <h3 class="drawer-title">视频详情</h3>
+          <button class="icon-btn" data-size="sm" data-close aria-label="close">${CLOSE_X}</button>
+        </header>
+        <div class="drawer-body" style="display:grid; gap: var(--space-4);">
+          <div style="aspect-ratio: 16/9; background: var(--media-placeholder); border-radius: var(--radius-md); position: relative; overflow: hidden;">
+            <div style="position:absolute; inset:0; background: radial-gradient(circle at 30% 40%, oklch(0.4 0.04 240) 0%, oklch(0.22 0.02 250) 70%);"></div>
+            <span class="tag t-mono" style="position:absolute; bottom: 8px; right: 8px; background: oklch(0 0 0 / 0.6); color: oklch(0.95 0 0); border-color: transparent;">12:34</span>
+          </div>
+          <div>
+            <div class="t-eyebrow" style="margin-bottom: 6px;">YouTube · 4 月 12 日</div>
+            <h4 style="font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--text-title); line-height: var(--lh-title); margin: 0 0 var(--space-2);">春日的傍晚 · 街头摄影</h4>
+            <div class="t-small t-secondary">岚野 — 33 个视频</div>
+          </div>
+          <div style="display:flex; gap: var(--space-2); flex-wrap: wrap;">
+            <span class="tag">摄影</span><span class="tag">街头</span><span class="tag">日落</span>
+          </div>
+          <p class="t-body t-secondary" style="margin:0;">1:23 的转场配上鸟鸣绝了。</p>
+        </div>
+        <footer class="drawer-footer">
+          <button class="btn" data-variant="ghost" data-close>关闭</button>
+          <button class="btn" data-variant="primary">播放</button>
+        </footer>
+      ` });
+    });
+
+    document.getElementById('open-sheet').addEventListener('click', () => {
+      openDrawer({ side: 'bottom', content: `
+        <header class="drawer-header">
+          <h3 class="drawer-title">已选 12 个视频</h3>
+          <button class="icon-btn" data-size="sm" data-close aria-label="close">${CLOSE_X}</button>
+        </header>
+        <div class="drawer-body">
+          <div style="display:flex; flex-wrap: wrap; gap: var(--space-3);">
+            <button class="btn" data-variant="secondary">加入合集…</button>
+            <button class="btn" data-variant="secondary">添加标签…</button>
+            <button class="btn" data-variant="secondary">刷新源</button>
+            <button class="btn" data-variant="secondary">下载</button>
+            <button class="btn" data-variant="danger">删除…</button>
+          </div>
+        </div>
+      ` });
+    });
+
+    /* Selectable tags inside dynamic dialogs (delegated) */
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-selectable="true"]');
+      if (t && t.classList.contains('tag')) {
+        t.dataset.selected = t.dataset.selected === 'true' ? 'false' : 'true';
+      }
+    });
+  </script>
+</body>
+</html>

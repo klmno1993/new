@@ -1,0 +1,535 @@
+/* ──────────────────────────────────────────────────────────────────
+   VEW · Cards
+   ──────────
+   The card family. Every card variant shares one interaction grammar:
+
+   STATIC          one line of meta. nothing else.
+   HOVER           thumbnail breathes (1.02 scale, 320ms),
+                   three floating quick actions appear top-right,
+                   title gains hairline underline-on-hover.
+   SELECT MODE     checkbox top-left, hover actions hidden,
+                   click toggles selection, accent ring on selected.
+   LIKED           heart icon-button stays filled regardless of hover.
+   ERROR / WAITING duration badge swaps for a state pill,
+                   thumbnail desaturated by 10%.
+
+   The "more menu" (8 ops) lives behind the "..." quick action.
+   ────────────────────────────────────────────────────────────────── */
+
+/* ── Thumbnail base ─────────────────────────────────────────────── */
+.thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: var(--media-placeholder);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+}
+.thumb-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 320ms var(--ease-gentle),
+              filter   var(--duration-2) var(--ease-swift);
+}
+/* When the "thumb-img" is actually a CSS gradient placeholder, just set the
+   gradient as the thumb's background and let it scale via a ::before. */
+.thumb[data-placeholder] .thumb-img { display: none; }
+.thumb[data-placeholder]::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--placeholder-bg, var(--media-placeholder));
+  transition: transform 320ms var(--ease-gentle),
+              filter   var(--duration-2) var(--ease-swift);
+}
+.thumb[data-placeholder]::after {
+  /* gentle grain to keep gradients from feeling vector-y */
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, oklch(1 0 0 / 0.04) 0, transparent 50%),
+    radial-gradient(circle at 80% 70%, oklch(0 0 0 / 0.10) 0, transparent 50%);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+}
+
+/* Duration badge — sits at bottom-right */
+.thumb-duration {
+  position: absolute; bottom: 8px; right: 8px;
+  display: inline-flex; align-items: center;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  color: oklch(0.965 0 0);
+  background: oklch(0 0 0 / 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 3px;
+  letter-spacing: 0;
+  z-index: 2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* State pill (replaces duration in error/parsing states) */
+.thumb-state {
+  position: absolute; bottom: 8px; left: 8px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px;
+  font-size: 11px; line-height: 1;
+  color: oklch(0.965 0 0);
+  background: oklch(0 0 0 / 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--radius-full);
+  z-index: 2;
+}
+.thumb-state[data-tone="warn"]  { background: oklch(from var(--warning) 0.35 c h / 0.85); }
+.thumb-state[data-tone="danger"]{ background: oklch(from var(--danger)  0.35 c h / 0.85); }
+.thumb-state .thumb-state-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+}
+.thumb-state[data-tone="warn"] .thumb-state-dot {
+  animation: vew-pulse 1.4s var(--ease-gentle) infinite;
+}
+@keyframes vew-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Platform badge — small icon top-left, optional */
+.thumb-platform {
+  position: absolute; top: 8px; left: 8px;
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: oklch(0 0 0 / 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 50%;
+  color: oklch(0.965 0 0);
+  z-index: 2;
+}
+.thumb-platform svg { width: 12px; height: 12px; }
+
+/* Quick actions overlay (top-right on hover) */
+.thumb-actions {
+  position: absolute; top: 8px; right: 8px;
+  display: flex; gap: 4px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--duration-2) var(--ease-swift),
+              transform var(--duration-2) var(--ease-swift);
+  z-index: 3;
+}
+.thumb-actions .qa {
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0;
+  background: oklch(0 0 0 / 0.55);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  color: oklch(0.95 0 0);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--duration-1) var(--ease-swift),
+              color var(--duration-1) var(--ease-swift),
+              transform var(--duration-1) var(--ease-swift);
+}
+.thumb-actions .qa:hover { background: oklch(0 0 0 / 0.78); transform: translateY(-1px); }
+.thumb-actions .qa svg { width: 14px; height: 14px; }
+.thumb-actions .qa[data-active="true"] { color: var(--accent); }
+.thumb-actions .qa[data-tone="liked"] { color: oklch(0.78 0.16 25); }
+
+/* Play affordance — soft circle in center on hover */
+.thumb-play {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-2) var(--ease-swift);
+  z-index: 1;
+  pointer-events: none;
+}
+.thumb-play-disc {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.9);
+  display: flex; align-items: center; justify-content: center;
+  color: oklch(0.16 0.006 250);
+  box-shadow: 0 6px 24px oklch(0 0 0 / 0.5);
+  transform: scale(0.92);
+  transition: transform var(--duration-2) var(--ease-enter);
+}
+.thumb-play-disc svg { width: 18px; height: 18px; margin-left: 2px; }
+
+/* Hover state */
+.thumb:hover .thumb-img,
+.thumb:hover::before { transform: scale(1.04); }
+.thumb:hover .thumb-actions { opacity: 1; transform: translateY(0); }
+.thumb:hover .thumb-play { opacity: 1; }
+.thumb:hover .thumb-play-disc { transform: scale(1); }
+
+/* Loading thumbnail variant */
+.thumb[data-loading="true"]::before {
+  background: linear-gradient(90deg, var(--media-placeholder) 0%, var(--media-shimmer) 50%, var(--media-placeholder) 100%);
+  background-size: 200% 100%;
+  animation: vew-shimmer 1.6s linear infinite;
+}
+
+/* Aspect overrides */
+.thumb[data-aspect="9:16"]  { aspect-ratio: 9 / 16; }
+.thumb[data-aspect="1:1"]   { aspect-ratio: 1 / 1; }
+.thumb[data-aspect="21:9"]  { aspect-ratio: 21 / 9; }
+
+/* ── VideoCard.Grid (16:9 default) ────────────────────────────── */
+.vcard {
+  display: grid;
+  gap: var(--space-3);
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--duration-1) var(--ease-swift);
+}
+.vcard-title {
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  letter-spacing: -0.005em;
+  transition: color var(--duration-1) var(--ease-swift);
+}
+.vcard:hover .vcard-title { color: var(--text-primary); }
+.vcard-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--text-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+.vcard-meta .creator {
+  color: var(--text-secondary);
+  transition: color var(--duration-1) var(--ease-swift);
+}
+.vcard:hover .vcard-meta .creator { color: var(--text-primary); }
+.vcard-meta .sep {
+  display: inline-block;
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  opacity: 0.6;
+}
+
+/* Select-mode overlay (when parent says so) */
+.vcard[data-selectable="true"] .vcard-select {
+  position: absolute; top: 8px; left: 8px; z-index: 4;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: oklch(0 0 0 / 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1.5px solid oklch(0.95 0 0 / 0.75);
+  color: transparent;
+  cursor: pointer;
+  transition: background var(--duration-1) var(--ease-swift),
+              border-color var(--duration-1) var(--ease-swift),
+              color var(--duration-1) var(--ease-swift),
+              opacity var(--duration-1) var(--ease-swift);
+  opacity: 0;
+}
+.vcard[data-selectable="true"]:hover .vcard-select,
+.vcard[data-selected="true"] .vcard-select { opacity: 1; }
+.vcard[data-selectable="true"] .vcard-select svg { width: 12px; height: 12px; }
+.vcard[data-selected="true"] .vcard-select {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
+}
+.vcard[data-selected="true"] .thumb {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.vcard[data-selected="true"] .thumb-actions,
+.vcard[data-selected="true"] .thumb-play { display: none; }
+
+/* Like state — keeps heart filled regardless of hover */
+.vcard[data-liked="true"] .qa-like {
+  opacity: 1 !important;
+  background: oklch(0 0 0 / 0.65);
+  color: oklch(0.78 0.16 25);
+}
+.vcard[data-liked="true"] .qa-like svg { fill: currentColor; stroke: none; }
+.vcard[data-liked="true"] .thumb-actions { opacity: 1; transform: translateY(0); }
+.vcard[data-liked="true"] .thumb-actions .qa:not(.qa-like) { opacity: 0; pointer-events: none; }
+.vcard[data-liked="true"]:hover .thumb-actions .qa:not(.qa-like) { opacity: 1; pointer-events: auto; }
+
+/* Density */
+.vcard[data-density="dense"] { gap: var(--space-2); }
+.vcard[data-density="dense"] .vcard-title { font-size: var(--text-small); line-height: var(--lh-small); }
+.vcard[data-density="dense"] .vcard-meta  { font-size: var(--text-micro); }
+
+/* ── VideoCard.Portrait (9:16) — uses same .vcard markup ──────── */
+.vcard[data-aspect="portrait"] .thumb { aspect-ratio: 9 / 16; }
+
+/* ── VideoCard.List (dense row) ───────────────────────────────── */
+.vlist {
+  display: grid;
+  grid-template-columns: 168px 1fr auto;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--duration-1) var(--ease-swift);
+}
+.vlist:hover { background: var(--bg-surface); }
+.vlist + .vlist { border-top: 1px solid var(--line-hairline); border-radius: 0; }
+.vlist + .vlist:hover, .vlist:hover + .vlist { border-color: transparent; }
+.vlist:first-child:hover + .vlist { border-color: transparent; }
+.vlist .thumb { aspect-ratio: 16/9; }
+.vlist[data-aspect="square"] { grid-template-columns: 96px 1fr auto; }
+.vlist[data-aspect="square"] .thumb { aspect-ratio: 1/1; }
+.vlist-body { min-width: 0; display: grid; gap: 4px; align-content: center; }
+.vlist-title {
+  font-size: var(--text-body); line-height: var(--lh-body);
+  color: var(--text-primary); font-weight: var(--weight-medium);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+.vlist-meta {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: var(--text-caption); color: var(--text-tertiary);
+}
+.vlist-meta .creator { color: var(--text-secondary); }
+.vlist-meta .sep { width: 2px; height: 2px; border-radius: 50%; background: currentColor; opacity: 0.6; }
+.vlist-actions {
+  display: flex; gap: 2px; align-items: center;
+  opacity: 0;
+  transition: opacity var(--duration-1) var(--ease-swift);
+}
+.vlist:hover .vlist-actions { opacity: 1; }
+.vlist-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+
+.vlist[data-selectable="true"] {
+  grid-template-columns: 32px 168px 1fr auto;
+}
+.vlist[data-selectable="true"][data-aspect="square"] {
+  grid-template-columns: 32px 96px 1fr auto;
+}
+.vlist-select {
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.vlist[data-selected="true"] {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* ── VideoCard.Cover (big featured) ───────────────────────────── */
+.vcover {
+  display: grid;
+  gap: var(--space-4);
+}
+.vcover .thumb { aspect-ratio: 21/9; }
+.vcover-body { display: grid; gap: var(--space-2); max-width: 60ch; }
+.vcover-eyebrow {
+  font-size: var(--text-micro); font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-uppercase); text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.vcover-title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-h2); line-height: 1.15;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+  margin: 0;
+}
+.vcover-meta {
+  display: flex; align-items: center; gap: var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-small);
+}
+
+/* ── CollectionCard ──────────────────────────────────────────── */
+.ccard {
+  display: grid;
+  gap: var(--space-3);
+  cursor: pointer;
+  position: relative;
+}
+.ccard-stack {
+  position: relative;
+  aspect-ratio: 16/9;
+}
+.ccard-stack .layer {
+  position: absolute;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--media-placeholder);
+  transition: transform 320ms var(--ease-gentle);
+  border: 1px solid var(--line-hairline);
+}
+.ccard-stack .layer-bg {
+  inset: 0;
+  background: var(--placeholder-bg, var(--media-placeholder));
+  z-index: 1;
+}
+.ccard-stack .layer-mid {
+  top: -10px; left: 6%; right: 6%; bottom: 10px;
+  background: var(--placeholder-bg-mid, var(--media-placeholder));
+  opacity: 0.7;
+  z-index: 0;
+  transform: scale(0.94);
+}
+.ccard-stack .layer-back {
+  top: -18px; left: 12%; right: 12%; bottom: 18px;
+  background: var(--placeholder-bg-back, var(--media-placeholder));
+  opacity: 0.4;
+  z-index: -1;
+  transform: scale(0.88);
+}
+.ccard:hover .layer-mid  { transform: scale(0.94) translateY(-2px); }
+.ccard:hover .layer-back { transform: scale(0.88) translateY(-4px); }
+
+.ccard-stack .layer-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, oklch(0 0 0 / 0.45) 100%);
+}
+.ccard-stack .count {
+  position: absolute; bottom: 10px; right: 10px;
+  z-index: 5;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 8px;
+  background: oklch(0 0 0 / 0.6);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--radius-full);
+  font-size: var(--text-caption);
+  color: oklch(0.95 0 0);
+}
+.ccard-stack .count svg { width: 12px; height: 12px; opacity: 0.8; }
+
+.ccard-body { display: grid; gap: 4px; padding-top: 4px; }
+.ccard-title {
+  font-size: var(--text-body);
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+  margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ccard-sub {
+  font-size: var(--text-caption);
+  color: var(--text-tertiary);
+}
+
+/* ── CreatorCard ─────────────────────────────────────────────── */
+.kcard {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  align-items: center;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--duration-1) var(--ease-swift);
+  border: 1px solid var(--line-hairline);
+  background: var(--bg-surface);
+}
+.kcard:hover { background: var(--bg-raised); border-color: var(--line-soft); }
+.kcard-body { min-width: 0; display: grid; gap: 2px; }
+.kcard-name {
+  font-size: var(--text-body); color: var(--text-primary);
+  font-weight: var(--weight-medium); margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kcard-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--text-caption); color: var(--text-tertiary);
+}
+.kcard-meta .sep { width: 2px; height: 2px; border-radius: 50%; background: currentColor; opacity: 0.6; }
+.kcard-action { display: flex; }
+
+/* ── DownloadCard.Row ────────────────────────────────────────── */
+.dcard {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--line-hairline);
+  align-items: center;
+  transition: border-color var(--duration-1) var(--ease-swift);
+}
+.dcard + .dcard { margin-top: var(--space-2); }
+.dcard:hover { border-color: var(--line-soft); }
+.dcard .thumb { aspect-ratio: 16/9; cursor: default; }
+.dcard-body { min-width: 0; display: grid; gap: 4px; }
+.dcard-title {
+  font-size: var(--text-small); line-height: var(--lh-small);
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+  margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dcard-stats {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.dcard-stats .sep { color: var(--text-disabled); }
+.dcard-stats .stage { color: var(--text-secondary); }
+.dcard-progress {
+  height: 2px;
+  background: var(--line-hairline);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 4px;
+  position: relative;
+}
+.dcard-progress-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width var(--duration-3) var(--ease-swift);
+}
+.dcard-progress[data-indeterminate="true"] .dcard-progress-fill {
+  width: 30% !important;
+  animation: vew-indeterminate 1.6s var(--ease-gentle) infinite;
+}
+@keyframes vew-indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(340%); }
+}
+.dcard-actions { display: flex; gap: 2px; align-items: center; }
+
+.dcard[data-status="paused"]   .dcard-progress-fill { background: var(--warning); }
+.dcard[data-status="failed"]   .dcard-progress-fill { background: var(--danger); }
+.dcard[data-status="complete"] .dcard-progress-fill { background: var(--success); width: 100% !important; }
+.dcard[data-status="queued"] .dcard-progress { opacity: 0.5; }
+
+.dcard-stats .stage[data-tone="warn"]   { color: var(--warning); }
+.dcard-stats .stage[data-tone="danger"] { color: var(--danger); }
+.dcard-stats .stage[data-tone="success"]{ color: var(--success); }
+
+/* ── Card grids (page-level helpers) ─────────────────────────── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+.cards-grid[data-aspect="portrait"] {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+.cards-grid[data-density="dense"] {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4) var(--space-3);
+}

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VEW · 设计令牌</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,16..72,400;0,16..72,500;0,16..72,600;1,16..72,400&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="src/tokens.css" />
+
+  <style>
+    /* ── Page chrome (used only by this showcase) ─────────────── */
+    .shell { max-width: 1040px; margin: 0 auto; padding: var(--space-7) var(--space-6) var(--space-10); }
+
+    @media (min-width: 1280px) {
+      .shell { padding-left: var(--space-8); padding-right: var(--space-8); }
+    }
+
+    /* Top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: var(--z-sticky);
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      background: color-mix(in oklch, var(--bg-canvas) 78%, transparent);
+      border-bottom: 1px solid var(--line-hairline);
+    }
+    .topbar-inner {
+      max-width: 1040px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-6);
+      height: 56px;
+    }
+    .brand { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-mark {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      background:
+        radial-gradient(120% 80% at 30% 20%, color-mix(in oklch, var(--accent) 50%, transparent) 0%, transparent 60%),
+        var(--bg-raised);
+      border: 1px solid var(--line-soft);
+      position: relative;
+    }
+    .brand-mark::after {
+      content: ""; position: absolute; inset: 6px 7px;
+      border-left: 1.5px solid var(--text-primary);
+      border-bottom: 1.5px solid var(--text-primary);
+      transform: rotate(-45deg) translate(1px, -1px);
+      opacity: .85;
+    }
+    .brand-name {
+      font-family: var(--font-display); font-size: 17px;
+      letter-spacing: var(--tracking-wide);
+      font-weight: var(--weight-medium);
+    }
+    .brand-divider { width: 1px; height: 16px; background: var(--line-soft); margin: 0 var(--space-3); }
+    .brand-section {
+      font-size: var(--text-small); color: var(--text-secondary);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .controls { display: flex; align-items: center; gap: var(--space-3); }
+
+    /* segmented controls */
+    .segment {
+      display: inline-flex; align-items: center;
+      padding: 2px;
+      background: var(--bg-surface);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-full);
+      gap: 2px;
+    }
+    .segment button {
+      appearance: none; border: 0; cursor: pointer;
+      padding: 4px 10px;
+      font: inherit; font-size: var(--text-caption); line-height: 1;
+      color: var(--text-secondary); background: transparent;
+      border-radius: var(--radius-full);
+      transition: color var(--duration-1) var(--ease-swift),
+                  background var(--duration-1) var(--ease-swift);
+    }
+    .segment button:hover { color: var(--text-primary); }
+    .segment button[aria-pressed="true"] {
+      background: var(--bg-raised);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 1px var(--line-soft) inset;
+    }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    .hero { padding-top: var(--space-7); padding-bottom: var(--space-8); border-bottom: 1px solid var(--line-hairline); }
+    .eyebrow {
+      font-size: var(--text-micro); line-height: var(--lh-micro);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-uppercase); text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: var(--space-4);
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-weight: var(--weight-regular);
+      font-size: clamp(38px, 5vw, 56px);
+      line-height: 1.12;
+      letter-spacing: var(--tracking-tight);
+      margin: 0 0 var(--space-5);
+      color: var(--text-primary);
+      max-width: 28ch;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--text-secondary);
+      font-weight: var(--weight-regular);
+    }
+    .hero-lede {
+      font-size: var(--text-lg); line-height: var(--lh-lg);
+      color: var(--text-secondary);
+      max-width: 64ch;
+      margin: 0;
+    }
+
+    /* ── Section ─────────────────────────────────────────────── */
+    section.tk-section { padding: var(--space-8) 0; border-bottom: 1px solid var(--line-hairline); }
+    section.tk-section:last-of-type { border-bottom: 0; }
+
+    .section-head { margin-bottom: var(--space-6); }
+    .section-head .num {
+      font-family: var(--font-mono); font-size: var(--text-caption);
+      color: var(--text-tertiary); letter-spacing: 0;
+      margin-bottom: var(--space-2);
+    }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-weight: var(--weight-regular);
+      font-size: var(--text-h2); line-height: var(--lh-h2);
+      letter-spacing: var(--tracking-tight);
+      margin: 0 0 var(--space-3);
+      color: var(--text-primary);
+    }
+    .section-head p {
+      font-size: var(--text-body); line-height: var(--lh-body);
+      color: var(--text-secondary);
+      max-width: 60ch; margin: 0;
+    }
+
+    .sub-eyebrow {
+      font-size: var(--text-micro); line-height: var(--lh-micro);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-uppercase); text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin: var(--space-6) 0 var(--space-3);
+    }
+
+    /* ── Color: swatches ─────────────────────────────────────── */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1px;
+      background: var(--line-hairline);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .sw {
+      background: var(--bg-surface);
+      padding: var(--space-4);
+      display: flex; flex-direction: column; gap: var(--space-3);
+      min-height: 132px;
+    }
+    .sw-chip {
+      width: 100%; height: 56px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line-hairline);
+    }
+    .sw-meta { display: flex; flex-direction: column; gap: 2px; }
+    .sw-name {
+      font-size: var(--text-small); line-height: var(--lh-small);
+      color: var(--text-primary); font-weight: var(--weight-medium);
+    }
+    .sw-token {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-tertiary); letter-spacing: 0;
+    }
+
+    /* Text tier demo */
+    .text-tier {
+      background: var(--bg-surface); border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      display: grid; grid-template-columns: 1fr; gap: var(--space-3);
+    }
+    .text-tier .row {
+      display: grid; grid-template-columns: 180px 1fr;
+      align-items: baseline; gap: var(--space-5);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px dashed var(--line-hairline);
+    }
+    .text-tier .row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .text-tier .row .lbl {
+      font-family: var(--font-mono); font-size: var(--text-caption);
+      color: var(--text-tertiary);
+    }
+    .tier-primary   { color: var(--text-primary); }
+    .tier-secondary { color: var(--text-secondary); }
+    .tier-tertiary  { color: var(--text-tertiary); }
+    .tier-disabled  { color: var(--text-disabled); }
+
+    /* Lines demo */
+    .lines-demo {
+      background: var(--bg-surface); border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      display: grid; gap: var(--space-4);
+    }
+    .lines-demo .ln {
+      display: grid; grid-template-columns: 180px 1fr 80px; align-items: center; gap: var(--space-4);
+    }
+    .lines-demo .ln .lbl {
+      font-family: var(--font-mono); font-size: var(--text-caption);
+      color: var(--text-tertiary);
+    }
+    .lines-demo .ln .bar { height: 1px; }
+    .ln-hairline { background: var(--line-hairline); }
+    .ln-soft     { background: var(--line-soft); }
+    .ln-strong   { background: var(--line-strong); }
+    .lines-demo .ln .val {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-tertiary); text-align: right;
+    }
+
+    /* ── Type samples ────────────────────────────────────────── */
+    .type-card {
+      background: var(--bg-surface); border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-6);
+    }
+    .type-row {
+      display: grid; grid-template-columns: 200px 1fr;
+      gap: var(--space-5);
+      padding: var(--space-4) 0;
+      border-bottom: 1px dashed var(--line-hairline);
+      align-items: baseline;
+    }
+    .type-row:first-child { padding-top: 0; }
+    .type-row:last-child  { padding-bottom: 0; border-bottom: 0; }
+    .type-row .meta {
+      display: flex; flex-direction: column; gap: 2px;
+      padding-top: 6px;
+    }
+    .type-row .meta .name {
+      font-size: var(--text-small); color: var(--text-primary); font-weight: var(--weight-medium);
+    }
+    .type-row .meta .spec {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-tertiary);
+    }
+    .type-row .sample { color: var(--text-primary); }
+    .type-row .sample .secondary { color: var(--text-secondary); display: block; margin-top: 4px; }
+
+    /* ── Spacing scale ───────────────────────────────────────── */
+    .space-card {
+      background: var(--bg-surface); border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-6);
+      display: grid; gap: var(--space-3);
+    }
+    .space-row {
+      display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; gap: var(--space-4);
+    }
+    .space-row .lbl, .space-row .val {
+      font-family: var(--font-mono); font-size: var(--text-caption);
+      color: var(--text-tertiary);
+    }
+    .space-row .val { text-align: right; }
+    .space-bar {
+      height: 12px; border-radius: 3px;
+      background: var(--accent-soft);
+      border-left: 2px solid var(--accent-line);
+      border-right: 2px solid var(--accent-line);
+    }
+
+    /* ── Radii ───────────────────────────────────────────────── */
+    .radius-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--space-4);
+    }
+    .radius-cell {
+      background: var(--bg-surface); border: 1px solid var(--line-hairline);
+      padding: var(--space-5);
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+      border-radius: var(--radius-md);
+    }
+    .radius-shape {
+      width: 80px; height: 80px;
+      background: var(--bg-raised);
+      border: 1px solid var(--line-soft);
+    }
+    .r-xs   { border-radius: var(--radius-xs); }
+    .r-sm   { border-radius: var(--radius-sm); }
+    .r-md   { border-radius: var(--radius-md); }
+    .r-lg   { border-radius: var(--radius-lg); }
+    .r-xl   { border-radius: var(--radius-xl); }
+    .r-full { border-radius: var(--radius-full); }
+    .radius-meta {
+      display: flex; flex-direction: column; gap: 2px; align-items: center;
+    }
+    .radius-name { font-size: var(--text-small); color: var(--text-primary); font-weight: var(--weight-medium); }
+    .radius-spec { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+
+    /* ── Shadow ──────────────────────────────────────────────── */
+    .shadow-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-5);
+    }
+    .shadow-cell {
+      background: var(--bg-canvas);
+      padding: var(--space-7) var(--space-5);
+      border-radius: var(--radius-md);
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-4);
+      border: 1px solid var(--line-hairline);
+    }
+    .shadow-block {
+      width: 100%; height: 80px;
+      background: var(--bg-raised);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line-hairline);
+    }
+    .sh-1 { box-shadow: var(--shadow-1); }
+    .sh-2 { box-shadow: var(--shadow-2); }
+    .sh-3 { box-shadow: var(--shadow-3); }
+
+    /* ── Motion ──────────────────────────────────────────────── */
+    .motion-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-4);
+    }
+    .motion-cell {
+      background: var(--bg-surface); border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: border-color var(--duration-1) var(--ease-swift);
+      user-select: none;
+    }
+    .motion-cell:hover { border-color: var(--line-soft); }
+    .motion-track {
+      position: relative;
+      height: 32px;
+      margin: var(--space-2) 0 var(--space-4);
+    }
+    .motion-track::before {
+      content: ""; position: absolute; left: 0; right: 0; top: 50%;
+      height: 1px; background: var(--line-hairline);
+    }
+    .motion-dot {
+      position: absolute; left: 0; top: 50%;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent);
+      transform: translate(0, -50%);
+    }
+    .motion-cell .name {
+      font-size: var(--text-small); color: var(--text-primary); font-weight: var(--weight-medium);
+      display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    }
+    .motion-cell .name .play {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-tertiary); letter-spacing: var(--tracking-uppercase);
+    }
+    .motion-cell .spec {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Layout / breakpoint ruler ───────────────────────────── */
+    .ruler {
+      background: var(--bg-surface); border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-6) var(--space-5);
+      position: relative;
+      overflow: hidden;
+    }
+    .ruler-line {
+      position: relative; height: 1px; background: var(--line-soft);
+      margin: var(--space-7) 0 var(--space-3);
+    }
+    .ruler-tick {
+      position: absolute; top: -8px; width: 1px; height: 16px;
+      background: var(--text-tertiary);
+    }
+    .ruler-label {
+      position: absolute; top: -32px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-tertiary);
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .ruler-value {
+      position: absolute; top: 14px;
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-disabled);
+      transform: translateX(-50%);
+    }
+
+    /* TOC sidebar (desktop only) */
+    .layout {
+      display: grid; grid-template-columns: 1fr;
+      gap: var(--space-7);
+    }
+    @media (min-width: 1100px) {
+      .layout { grid-template-columns: 200px 1fr; gap: var(--space-8); }
+      .toc {
+        position: sticky; top: 80px;
+        align-self: start;
+        padding-top: var(--space-7);
+      }
+    }
+    .toc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+    .toc-list a {
+      display: grid; grid-template-columns: 28px 1fr; gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-sm);
+      color: var(--text-tertiary);
+      text-decoration: none;
+      font-size: var(--text-small); line-height: 1.4;
+      transition: color var(--duration-1) var(--ease-swift),
+                  background var(--duration-1) var(--ease-swift);
+    }
+    .toc-list a:hover { color: var(--text-primary); background: var(--bg-surface); }
+    .toc-list a .n { font-family: var(--font-mono); font-size: 10px; color: var(--text-disabled); }
+    .toc-list a.active { color: var(--text-primary); }
+    .toc-list a.active .n { color: var(--accent); }
+
+    /* Footer */
+    .foot {
+      padding-top: var(--space-7); padding-bottom: var(--space-4);
+      display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;
+      color: var(--text-tertiary); font-size: var(--text-small);
+    }
+    .foot a {
+      color: var(--text-secondary); text-decoration: none;
+      border-bottom: 1px solid var(--line-soft);
+      transition: color var(--duration-1) var(--ease-swift);
+    }
+    .foot a:hover { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <span class="brand-name">VEW</span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-section" data-i18n="tokens.title">设计令牌</span>
+      </div>
+      <div class="controls">
+        <div class="segment" role="group" aria-label="Theme">
+          <button data-theme-set="dark"  data-i18n="theme.dark">暗</button>
+          <button data-theme-set="light" data-i18n="theme.light">亮</button>
+          <button data-theme-set="auto"  data-i18n="theme.auto">跟随</button>
+        </div>
+        <div class="segment" role="group" aria-label="Language">
+          <button data-lang-set="zh">中</button>
+          <button data-lang-set="en">EN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <!-- ── Hero ──────────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="eyebrow" data-i18n="tokens.preamble.eyebrow">白天鹅原则</div>
+      <h1>
+        <span data-i18n="type.sample.display.zh">在静水之下，</span>
+        <em data-i18n="type.sample.display.en">用力划水。</em>
+      </h1>
+      <p class="hero-lede" data-i18n="tokens.preamble.body"></p>
+    </section>
+
+    <div class="layout">
+      <aside class="toc" aria-label="Sections">
+        <ul class="toc-list">
+          <li><a href="#color"  data-toc="color"><span class="n">01</span><span data-i18n="tokens.section.color">色彩</span></a></li>
+          <li><a href="#type"   data-toc="type"><span class="n">02</span><span data-i18n="tokens.section.type">排版</span></a></li>
+          <li><a href="#space"  data-toc="space"><span class="n">03</span><span data-i18n="tokens.section.space">间距</span></a></li>
+          <li><a href="#radius" data-toc="radius"><span class="n">04</span><span data-i18n="tokens.section.radius">圆角</span></a></li>
+          <li><a href="#shadow" data-toc="shadow"><span class="n">05</span><span data-i18n="tokens.section.shadow">阴影</span></a></li>
+          <li><a href="#motion" data-toc="motion"><span class="n">06</span><span data-i18n="tokens.section.motion">动效</span></a></li>
+          <li><a href="#layout" data-toc="layout"><span class="n">07</span><span data-i18n="tokens.section.layout">布局</span></a></li>
+        </ul>
+      </aside>
+
+      <div class="content">
+        <!-- ── 01 · Color ───────────────────────────────────── -->
+        <section id="color" class="tk-section">
+          <header class="section-head">
+            <div class="num">01 · Color</div>
+            <h2 data-i18n="tokens.section.color">色彩</h2>
+            <p data-i18n="tokens.section.color.desc"></p>
+          </header>
+
+          <div class="sub-eyebrow" data-i18n="tokens.surface">表面</div>
+          <div class="swatch-grid">
+            <div class="sw"><div class="sw-chip" style="background: var(--bg-canvas)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.surface.canvas"></span><span class="sw-token">--bg-canvas</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--bg-surface)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.surface.surface"></span><span class="sw-token">--bg-surface</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--bg-raised)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.surface.raised"></span><span class="sw-token">--bg-raised</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--bg-overlay)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.surface.overlay"></span><span class="sw-token">--bg-overlay</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--bg-sunken)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.surface.sunken"></span><span class="sw-token">--bg-sunken</span></div></div>
+          </div>
+
+          <div class="sub-eyebrow" data-i18n="tokens.text">文本</div>
+          <div class="text-tier">
+            <div class="row"><span class="lbl">--text-primary</span>   <span class="tier-primary"   data-i18n="tokens.text.primary">主要文本 · The quick brown fox</span></div>
+            <div class="row"><span class="lbl">--text-secondary</span> <span class="tier-secondary" data-i18n="tokens.text.secondary">次要文本 · The quick brown fox</span></div>
+            <div class="row"><span class="lbl">--text-tertiary</span>  <span class="tier-tertiary"  data-i18n="tokens.text.tertiary">弱化文本 · The quick brown fox</span></div>
+            <div class="row"><span class="lbl">--text-disabled</span>  <span class="tier-disabled"  data-i18n="tokens.text.disabled">禁用文本 · The quick brown fox</span></div>
+          </div>
+
+          <div class="sub-eyebrow" data-i18n="tokens.line">线条</div>
+          <div class="lines-demo">
+            <div class="ln"><span class="lbl">--line-hairline</span> <span class="bar ln-hairline"></span><span class="val" data-i18n="tokens.line.hairline">发丝线</span></div>
+            <div class="ln"><span class="lbl">--line-soft</span>     <span class="bar ln-soft"></span>    <span class="val" data-i18n="tokens.line.soft">柔和线</span></div>
+            <div class="ln"><span class="lbl">--line-strong</span>   <span class="bar ln-strong"></span>  <span class="val" data-i18n="tokens.line.strong">强调线</span></div>
+          </div>
+
+          <div class="sub-eyebrow" data-i18n="tokens.accent">强调</div>
+          <div class="swatch-grid">
+            <div class="sw"><div class="sw-chip" style="background: var(--accent)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.accent.base"></span><span class="sw-token">--accent</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--accent-soft); border:1px solid var(--accent-line);"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.accent.soft"></span><span class="sw-token">--accent-soft</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--bg-surface); border:1px solid var(--accent-line);"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.accent.line"></span><span class="sw-token">--accent-line</span></div></div>
+          </div>
+
+          <div class="sub-eyebrow" data-i18n="tokens.semantic">状态</div>
+          <div class="swatch-grid">
+            <div class="sw"><div class="sw-chip" style="background: var(--success)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.semantic.success"></span><span class="sw-token">--success</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--warning)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.semantic.warning"></span><span class="sw-token">--warning</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--danger)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.semantic.danger"></span><span class="sw-token">--danger</span></div></div>
+            <div class="sw"><div class="sw-chip" style="background: var(--info)"></div><div class="sw-meta"><span class="sw-name" data-i18n="tokens.semantic.info"></span><span class="sw-token">--info</span></div></div>
+          </div>
+        </section>
+
+        <!-- ── 02 · Typography ─────────────────────────────── -->
+        <section id="type" class="tk-section">
+          <header class="section-head">
+            <div class="num">02 · Type</div>
+            <h2 data-i18n="tokens.section.type">排版</h2>
+            <p data-i18n="tokens.section.type.desc"></p>
+          </header>
+
+          <div class="type-card">
+            <div class="type-row">
+              <div class="meta"><div class="name">Display</div><div class="spec">--font-display · 40 / 50 · 400</div></div>
+              <div class="sample">
+                <span class="t-display" data-i18n="type.sample.display.zh">在静水之下，用力划水</span>
+                <span class="secondary t-display" style="font-style:italic" data-i18n="type.sample.display.en">Effortless above, deliberate below.</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Heading 2</div><div class="spec">--font-display · 28 / 36 · 400</div></div>
+              <div class="sample">
+                <span class="t-h2">为它驻足。Pause for it.</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Title</div><div class="spec">--font-ui · 20 / 28 · 500</div></div>
+              <div class="sample">
+                <span class="t-title">导航与卡片标题 · Navigation &amp; card titles</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Body LG</div><div class="spec">--font-ui · 16 / 26 · 400</div></div>
+              <div class="sample">
+                <span class="t-lg" data-i18n="type.sample.body.zh">VEW 是创作者与策展人的私人避难所。</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Body</div><div class="spec">--font-ui · 14 / 22 · 400 · default</div></div>
+              <div class="sample">
+                <span class="t-body" data-i18n="type.sample.body.zh">VEW 是创作者与策展人的私人避难所。它剥离了社交平台的喧嚣，只把你收藏的视频，放在最干净的环境里。</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Small</div><div class="spec">--font-ui · 13 / 20 · 400</div></div>
+              <div class="sample">
+                <span class="t-small">Meta 信息、表单 hint、菜单项 · Meta, hints, menu items</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Caption</div><div class="spec">--font-ui · 12 / 18 · 400</div></div>
+              <div class="sample">
+                <span class="t-caption">缩略图角标、内联说明 · Thumb badges, inline notes</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Eyebrow</div><div class="spec">--font-ui · 11 / 16 · 500 · uppercase · 0.12em</div></div>
+              <div class="sample">
+                <span class="t-eyebrow">Section Label · 段落标签</span>
+              </div>
+            </div>
+            <div class="type-row">
+              <div class="meta"><div class="name">Mono</div><div class="spec">--font-mono · tabular numbers</div></div>
+              <div class="sample">
+                <span class="t-mono t-body" data-i18n="type.sample.mono">00:01:23.456 · /api/v1/videos/abc123</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 03 · Spacing ────────────────────────────────── -->
+        <section id="space" class="tk-section">
+          <header class="section-head">
+            <div class="num">03 · Spacing</div>
+            <h2 data-i18n="tokens.section.space">间距</h2>
+            <p data-i18n="tokens.section.space.desc"></p>
+          </header>
+
+          <div class="space-card" id="space-grid"></div>
+        </section>
+
+        <!-- ── 04 · Radii ──────────────────────────────────── -->
+        <section id="radius" class="tk-section">
+          <header class="section-head">
+            <div class="num">04 · Radii</div>
+            <h2 data-i18n="tokens.section.radius">圆角</h2>
+            <p data-i18n="tokens.section.radius.desc"></p>
+          </header>
+
+          <div class="radius-grid">
+            <div class="radius-cell"><div class="radius-shape r-xs"></div><div class="radius-meta"><span class="radius-name">XS</span><span class="radius-spec">2px · --radius-xs</span></div></div>
+            <div class="radius-cell"><div class="radius-shape r-sm"></div><div class="radius-meta"><span class="radius-name">SM</span><span class="radius-spec">6px · --radius-sm</span></div></div>
+            <div class="radius-cell"><div class="radius-shape r-md"></div><div class="radius-meta"><span class="radius-name">MD</span><span class="radius-spec">10px · --radius-md</span></div></div>
+            <div class="radius-cell"><div class="radius-shape r-lg"></div><div class="radius-meta"><span class="radius-name">LG</span><span class="radius-spec">16px · --radius-lg</span></div></div>
+            <div class="radius-cell"><div class="radius-shape r-xl"></div><div class="radius-meta"><span class="radius-name">XL</span><span class="radius-spec">24px · --radius-xl</span></div></div>
+            <div class="radius-cell"><div class="radius-shape r-full"></div><div class="radius-meta"><span class="radius-name">FULL</span><span class="radius-spec">--radius-full</span></div></div>
+          </div>
+        </section>
+
+        <!-- ── 05 · Shadow ─────────────────────────────────── -->
+        <section id="shadow" class="tk-section">
+          <header class="section-head">
+            <div class="num">05 · Elevation</div>
+            <h2 data-i18n="tokens.section.shadow">阴影</h2>
+            <p data-i18n="tokens.section.shadow.desc"></p>
+          </header>
+
+          <div class="shadow-grid">
+            <div class="shadow-cell"><div class="shadow-block sh-1"></div><div class="radius-meta"><span class="radius-name">Shadow 1</span><span class="radius-spec">--shadow-1</span></div></div>
+            <div class="shadow-cell"><div class="shadow-block sh-2"></div><div class="radius-meta"><span class="radius-name">Shadow 2</span><span class="radius-spec">--shadow-2</span></div></div>
+            <div class="shadow-cell"><div class="shadow-block sh-3"></div><div class="radius-meta"><span class="radius-name">Shadow 3</span><span class="radius-spec">--shadow-3</span></div></div>
+          </div>
+        </section>
+
+        <!-- ── 06 · Motion ─────────────────────────────────── -->
+        <section id="motion" class="tk-section">
+          <header class="section-head">
+            <div class="num">06 · Motion</div>
+            <h2 data-i18n="tokens.section.motion">动效</h2>
+            <p data-i18n="tokens.section.motion.desc"></p>
+          </header>
+
+          <div class="motion-grid" id="motion-grid"></div>
+        </section>
+
+        <!-- ── 07 · Layout ─────────────────────────────────── -->
+        <section id="layout" class="tk-section">
+          <header class="section-head">
+            <div class="num">07 · Layout</div>
+            <h2 data-i18n="tokens.section.layout">布局</h2>
+            <p data-i18n="tokens.section.layout.desc"></p>
+          </header>
+
+          <div class="ruler" id="bp-ruler">
+            <div class="ruler-line">
+              <div class="ruler-tick" style="left: 0%"><div class="ruler-label">0</div><div class="ruler-value">px</div></div>
+              <div class="ruler-tick" style="left: 22.5%"><div class="ruler-label">SM</div><div class="ruler-value">720</div></div>
+              <div class="ruler-tick" style="left: 32%"><div class="ruler-label">MD</div><div class="ruler-value">1024</div></div>
+              <div class="ruler-tick" style="left: 40%"><div class="ruler-label">LG</div><div class="ruler-value">1280</div></div>
+              <div class="ruler-tick" style="left: 50%"><div class="ruler-label">XL</div><div class="ruler-value">1600</div></div>
+              <div class="ruler-tick" style="left: 100%"><div class="ruler-label">3200</div><div class="ruler-value">px</div></div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="foot">
+          <span>VEW · Pass 0 · <span class="t-mono">tokens v0.1</span></span>
+          <span>Next: <a href="#" id="next-link">Primitives →</a></span>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <script src="src/theme.js"></script>
+  <script src="src/i18n.js"></script>
+  <script>
+    // ── Theme segment ─────────────────────────────────────────
+    function syncThemeSegment() {
+      const mode = document.documentElement.dataset.themeMode || 'dark';
+      document.querySelectorAll('[data-theme-set]').forEach((b) => {
+        b.setAttribute('aria-pressed', b.dataset.themeSet === mode ? 'true' : 'false');
+      });
+    }
+    document.querySelectorAll('[data-theme-set]').forEach((b) => {
+      b.addEventListener('click', () => { window.VEWTheme.set(b.dataset.themeSet); syncThemeSegment(); });
+    });
+    syncThemeSegment();
+
+    // ── Lang segment ──────────────────────────────────────────
+    function syncLangSegment() {
+      const lang = window.VEWi18n?.getLang() || 'zh';
+      document.querySelectorAll('[data-lang-set]').forEach((b) => {
+        b.setAttribute('aria-pressed', b.dataset.langSet === lang ? 'true' : 'false');
+      });
+    }
+    document.querySelectorAll('[data-lang-set]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        await window.VEWi18n.setLang(b.dataset.langSet);
+        syncLangSegment();
+      });
+    });
+    window.addEventListener('vew:langchange', syncLangSegment);
+    setTimeout(syncLangSegment, 100);
+
+    // ── Spacing scale (rendered) ──────────────────────────────
+    (function () {
+      const scale = [
+        ['--space-1', 4],
+        ['--space-2', 8],
+        ['--space-3', 12],
+        ['--space-4', 16],
+        ['--space-5', 24],
+        ['--space-6', 32],
+        ['--space-7', 48],
+        ['--space-8', 64],
+        ['--space-9', 96],
+        ['--space-10', 128],
+      ];
+      const max = 128;
+      const grid = document.getElementById('space-grid');
+      scale.forEach(([name, px]) => {
+        const row = document.createElement('div');
+        row.className = 'space-row';
+        row.innerHTML = `
+          <span class="lbl">${name}</span>
+          <div><div class="space-bar" style="width: ${(px / max) * 100}%"></div></div>
+          <span class="val">${px}px</span>
+        `;
+        grid.appendChild(row);
+      });
+    })();
+
+    // ── Motion playground ────────────────────────────────────
+    (function () {
+      const curves = [
+        { name: 'ease-enter',  spec: 'cubic-bezier(0.16, 1, 0.3, 1)',     css: 'var(--ease-enter)',  duration: 'var(--duration-3)' },
+        { name: 'ease-exit',   spec: 'cubic-bezier(0.7, 0, 0.84, 0)',     css: 'var(--ease-exit)',   duration: 'var(--duration-2)' },
+        { name: 'ease-swift',  spec: 'cubic-bezier(0.4, 0, 0.2, 1)',      css: 'var(--ease-swift)',  duration: 'var(--duration-2)' },
+        { name: 'ease-gentle', spec: 'cubic-bezier(0.45, 0.05, 0.55, 0.95)', css: 'var(--ease-gentle)', duration: 'var(--duration-3)' },
+      ];
+      const grid = document.getElementById('motion-grid');
+      curves.forEach((c) => {
+        const cell = document.createElement('div');
+        cell.className = 'motion-cell';
+        cell.innerHTML = `
+          <div class="name"><span>${c.name}</span><span class="play">click ▸</span></div>
+          <div class="motion-track"><div class="motion-dot"></div></div>
+          <div class="spec">${c.spec}</div>
+        `;
+        const dot = cell.querySelector('.motion-dot');
+        let toRight = true;
+        function play() {
+          const trackWidth = cell.querySelector('.motion-track').clientWidth - 12;
+          dot.style.transition = 'none';
+          dot.style.transform = `translate(${toRight ? 0 : trackWidth}px, -50%)`;
+          // force reflow
+          // eslint-disable-next-line no-unused-expressions
+          dot.offsetHeight;
+          dot.style.transition = `transform ${c.duration} ${c.css}`;
+          dot.style.transform = `translate(${toRight ? trackWidth : 0}px, -50%)`;
+          toRight = !toRight;
+        }
+        cell.addEventListener('click', play);
+        // auto-play once for taste
+        setTimeout(play, 600);
+        grid.appendChild(cell);
+      });
+    })();
+
+    // ── TOC active section ────────────────────────────────────
+    (function () {
+      const links = document.querySelectorAll('[data-toc]');
+      const map = {};
+      links.forEach((l) => { map[l.dataset.toc] = l; });
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove('active'));
+            const id = e.target.id;
+            if (map[id]) map[id].classList.add('active');
+          }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      ['color', 'type', 'space', 'radius', 'shadow', 'motion', 'layout'].forEach((id) => {
+        const el = document.getElementById(id); if (el) obs.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VEW · 应用骨架 与 播放器</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,16..72,400;0,16..72,500;0,16..72,600;1,16..72,400&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="src/tokens.css" />
+  <link rel="stylesheet" href="src/primitives.css" />
+  <link rel="stylesheet" href="src/feedback.css" />
+  <link rel="stylesheet" href="src/cards.css" />
+  <link rel="stylesheet" href="src/chrome.css" />
+  <link rel="stylesheet" href="src/player.css" />
+
+  <style>
+    .page-shell { max-width: 1200px; margin: 0 auto; padding: var(--space-7) var(--space-6) var(--space-10); }
+    @media (min-width: 1280px) { .page-shell { padding-left: var(--space-8); padding-right: var(--space-8); } }
+
+    .page-top {
+      position: sticky; top: 0; z-index: var(--z-sticky);
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      background: color-mix(in oklch, var(--bg-canvas) 78%, transparent);
+      border-bottom: 1px solid var(--line-hairline);
+    }
+    .page-top-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-6); height: 56px; }
+    .pt-brand { display: flex; align-items: center; gap: var(--space-3); }
+    .pt-mark { width: 24px; height: 24px; display: inline-flex; }
+    .pt-name { font-family: var(--font-ui); font-size: 17px; letter-spacing: -0.02em; font-weight: var(--weight-medium); }
+    .pt-div { width: 1px; height: 16px; background: var(--line-soft); margin: 0 var(--space-3); }
+    .pt-section { font-size: var(--text-small); color: var(--text-secondary); letter-spacing: var(--tracking-wide); }
+    .pt-controls { display: flex; align-items: center; gap: var(--space-3); }
+    .pt-back { color: var(--text-tertiary); text-decoration: none; font-size: var(--text-small); transition: color var(--duration-1) var(--ease-swift); }
+    .pt-back:hover { color: var(--text-primary); }
+    .pt-segment { display: inline-flex; align-items: center; padding: 2px; background: var(--bg-surface); border: 1px solid var(--line-hairline); border-radius: var(--radius-full); gap: 2px; }
+    .pt-segment button { appearance: none; border: 0; cursor: pointer; padding: 4px 10px; font: inherit; font-size: var(--text-caption); line-height: 1; color: var(--text-secondary); background: transparent; border-radius: var(--radius-full); transition: color var(--duration-1) var(--ease-swift), background var(--duration-1) var(--ease-swift); }
+    .pt-segment button:hover { color: var(--text-primary); }
+    .pt-segment button[aria-pressed="true"] { background: var(--bg-raised); color: var(--text-primary); box-shadow: 0 0 0 1px var(--line-soft) inset; }
+
+    .hero { padding-top: var(--space-7); padding-bottom: var(--space-7); border-bottom: 1px solid var(--line-hairline); }
+    .eyebrow { font-size: var(--text-micro); font-weight: var(--weight-medium); letter-spacing: var(--tracking-uppercase); text-transform: uppercase; color: var(--text-tertiary); margin-bottom: var(--space-4); }
+    .hero h1 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: clamp(34px, 4.5vw, 48px); line-height: 1.14; letter-spacing: var(--tracking-tight); margin: 0 0 var(--space-5); color: var(--text-primary); max-width: 26ch; }
+    .hero p { font-size: var(--text-lg); line-height: var(--lh-lg); color: var(--text-secondary); max-width: 62ch; margin: 0; }
+
+    section.pr-section { padding: var(--space-7) 0; border-bottom: 1px solid var(--line-hairline); }
+    section.pr-section:last-of-type { border-bottom: 0; }
+    .section-head { margin-bottom: var(--space-5); display: grid; gap: var(--space-2); }
+    .section-head .num { font-family: var(--font-mono); font-size: var(--text-caption); color: var(--text-tertiary); }
+    .section-head h2 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--text-h2); line-height: var(--lh-h2); letter-spacing: var(--tracking-tight); margin: 0; }
+    .section-head p { font-size: var(--text-body); color: var(--text-secondary); margin: 0; max-width: 60ch; }
+
+    .layout { display: grid; grid-template-columns: 1fr; gap: var(--space-7); }
+    @media (min-width: 1180px) {
+      .layout { grid-template-columns: 200px 1fr; gap: var(--space-8); }
+      .toc { position: sticky; top: 80px; align-self: start; padding-top: var(--space-7); }
+    }
+    .toc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+    .toc-list a { display: grid; grid-template-columns: 28px 1fr; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); color: var(--text-tertiary); text-decoration: none; font-size: var(--text-small); transition: color var(--duration-1) var(--ease-swift), background var(--duration-1) var(--ease-swift); }
+    .toc-list a:hover { color: var(--text-primary); background: var(--bg-surface); }
+    .toc-list a .n { font-family: var(--font-mono); font-size: 10px; color: var(--text-disabled); }
+    .toc-list a.active { color: var(--text-primary); }
+    .toc-list a.active .n { color: var(--accent); }
+
+    .foot { padding-top: var(--space-7); padding-bottom: var(--space-4); display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; color: var(--text-tertiary); font-size: var(--text-small); }
+    .foot a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--line-soft); transition: color var(--duration-1) var(--ease-swift); }
+    .foot a:hover { color: var(--text-primary); }
+
+    .brand-svg .l-wing { fill: var(--text-primary); }
+    .brand-svg .r-wing { fill: var(--text-primary); opacity: 0.32; }
+
+    /* Atmospheric placeholders (re-used) */
+    .ph-dusk    { --placeholder-bg: linear-gradient(180deg, oklch(0.42 0.06 30) 0%, oklch(0.28 0.04 250) 60%, oklch(0.20 0.03 260) 100%); }
+    .ph-forest  { --placeholder-bg: radial-gradient(ellipse at 30% 80%, oklch(0.48 0.06 150) 0%, oklch(0.20 0.02 180) 70%); }
+    .ph-neon    { --placeholder-bg: radial-gradient(circle at 65% 65%, oklch(0.45 0.16 310) 0%, transparent 60%), linear-gradient(180deg, oklch(0.22 0.05 280) 0%, oklch(0.12 0.02 250) 100%); }
+    .ph-warm    { --placeholder-bg: radial-gradient(circle at 30% 40%, oklch(0.58 0.10 60) 0%, oklch(0.22 0.04 30) 70%); }
+    .ph-violet  { --placeholder-bg: linear-gradient(160deg, oklch(0.40 0.10 290) 0%, oklch(0.20 0.05 280) 100%); }
+    .ph-glacier { --placeholder-bg: linear-gradient(180deg, oklch(0.65 0.04 200) 0%, oklch(0.30 0.04 220) 100%); }
+
+    /* Player demo wrapper — handles aspect + state controls panel */
+    .player-demo {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: var(--space-4);
+      align-items: flex-start;
+    }
+    @media (max-width: 920px) { .player-demo { grid-template-columns: 1fr; } }
+    .player-state-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: grid; gap: var(--space-3);
+    }
+    .player-state-panel .lbl {
+      font-size: var(--text-micro); font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-uppercase); text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .player-state-panel .opts { display: grid; gap: 2px; }
+    .player-state-panel .opts button {
+      appearance: none; border: 0;
+      text-align: left;
+      padding: 6px 8px;
+      background: transparent;
+      color: var(--text-secondary);
+      font: inherit; font-size: var(--text-small);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--duration-1) var(--ease-swift), color var(--duration-1) var(--ease-swift);
+    }
+    .player-state-panel .opts button:hover { color: var(--text-primary); background: var(--bg-raised); }
+    .player-state-panel .opts button[aria-pressed="true"] {
+      background: var(--bg-raised); color: var(--text-primary);
+      box-shadow: 0 0 0 1px var(--line-soft) inset;
+    }
+
+    /* The video element placeholder — use a CSS gradient surface instead of a real <video> */
+    .video-mock {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 40% 30%, oklch(0.55 0.10 30) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 75%, oklch(0.42 0.06 250) 0%, transparent 50%),
+        linear-gradient(180deg, oklch(0.22 0.05 260) 0%, oklch(0.10 0.02 250) 100%);
+      z-index: 1;
+    }
+    .video-mock::after {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 30% 40%, oklch(1 0 0 / 0.03) 0, transparent 30%),
+        radial-gradient(circle at 70% 60%, oklch(0 0 0 / 0.18) 0, transparent 40%);
+      pointer-events: none;
+    }
+
+    /* App shell mock canvas grid */
+    .mock-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-4) var(--space-3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand mark & icon set -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="vew-mark" viewBox="0 0 120 120">
+        <path class="l-wing" d="M27 22 Q26 18 30 18 L40 18 Q43 18 44 21 L62 86 Q62.5 89 60 89 L52 89 Q49 89 48 86 L27 22 Z"/>
+        <path class="r-wing" d="M93 22 Q94 18 90 18 L80 18 Q77 18 76 21 L58 86 Q57.5 89 60 89 L68 89 Q71 89 72 86 L93 22 Z"/>
+      </symbol>
+
+      <symbol id="ic-search"   viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+      <symbol id="ic-bell"     viewBox="0 0 24 24"><path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 3h16l-2-3z M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+      <symbol id="ic-home"     viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-stack"    viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><polyline points="2 17 12 22 22 17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><polyline points="2 12 12 17 22 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-user"     viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+      <symbol id="ic-down"     viewBox="0 0 24 24"><path d="M12 3v14M5 12l7 7 7-7M3 21h18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-tag"      viewBox="0 0 24 24"><path d="M20.59 13.41L13 21l-9-9V4h8l8.59 8.59a2 2 0 0 1 0 2.82z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/></symbol>
+      <symbol id="ic-heart"    viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-clock"    viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="12 7 12 12 15.5 13.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-chart"    viewBox="0 0 24 24"><path d="M3 21V8M9 21V3M15 21v-9M21 21V12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+      <symbol id="ic-trash"    viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-grid"     viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+      <symbol id="ic-plus"     viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+      <symbol id="ic-play"     viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></symbol>
+      <symbol id="ic-pause"    viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="0.8" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="0.8" fill="currentColor"/></symbol>
+      <symbol id="ic-skip-prev" viewBox="0 0 24 24"><path d="M6 5v14M20 5L8 12l12 7V5z" fill="currentColor"/></symbol>
+      <symbol id="ic-skip-next" viewBox="0 0 24 24"><path d="M18 5v14M4 5l12 7L4 19V5z" fill="currentColor"/></symbol>
+      <symbol id="ic-vol"      viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z M16 8a5 5 0 0 1 0 8 M19 5a9 9 0 0 1 0 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-cc"       viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 10a2 2 0 0 0-4 0v4a2 2 0 0 0 4 0M18 10a2 2 0 0 0-4 0v4a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+      <symbol id="ic-pip"      viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="11" width="8" height="6" rx="1" fill="currentColor"/></symbol>
+      <symbol id="ic-fs"       viewBox="0 0 24 24"><path d="M4 9V4h5 M20 9V4h-5 M4 15v5h5 M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+      <symbol id="ic-close"    viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="ic-retry"    viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-err"      viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="ic-link"     viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-more"     viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></symbol>
+      <symbol id="ic-expand"   viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-check"    viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="page-top">
+    <div class="page-top-inner">
+      <div class="pt-brand">
+        <svg class="pt-mark brand-svg" aria-hidden="true"><use href="#vew-mark"/></svg>
+        <span class="pt-name">VEW</span>
+        <span class="pt-div" aria-hidden="true"></span>
+        <span class="pt-section">应用骨架与播放器</span>
+      </div>
+      <div class="pt-controls">
+        <a href="tokens.html" class="pt-back">Tokens</a>
+        <a href="primitives.html" class="pt-back">Primitives</a>
+        <a href="feedback.html" class="pt-back">Feedback</a>
+        <a href="cards.html" class="pt-back">← Cards</a>
+        <div class="pt-segment" role="group" aria-label="Theme">
+          <button data-theme-set="dark">暗</button>
+          <button data-theme-set="light">亮</button>
+          <button data-theme-set="auto">跟随</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div class="eyebrow">Pass 03b · Chrome &amp; Player</div>
+      <h1>把家具放好，让媒体说话。</h1>
+      <p>顶栏永远在那里却不抢戏；侧栏是路标也是分类台；⌘K 是这个应用的真正心脏；播放器从不傻大黑粗，控制栏来去如风。试试 <span class="kbd">⌘</span> <span class="kbd">K</span> 打开命令面板。</p>
+    </section>
+
+    <div class="layout">
+      <aside class="toc">
+        <ul class="toc-list">
+          <li><a href="#topbar"  data-toc="topbar"><span class="n">01</span><span>Top Bar</span></a></li>
+          <li><a href="#shell"   data-toc="shell"><span class="n">02</span><span>App Shell</span></a></li>
+          <li><a href="#cmdk"    data-toc="cmdk"><span class="n">03</span><span>⌘K Palette</span></a></li>
+          <li><a href="#batch"   data-toc="batch"><span class="n">04</span><span>Batch Bar</span></a></li>
+          <li><a href="#task"    data-toc="task"><span class="n">05</span><span>Task Pill</span></a></li>
+          <li><a href="#player"  data-toc="player"><span class="n">06</span><span>Player</span></a></li>
+          <li><a href="#mini"    data-toc="mini"><span class="n">07</span><span>Mini Player</span></a></li>
+        </ul>
+      </aside>
+
+      <div class="content">
+
+        <!-- ── 01 Top Bar ────────────────────────────────────── -->
+        <section id="topbar" class="pr-section">
+          <header class="section-head">
+            <div class="num">01 · Top Bar</div>
+            <h2>顶栏</h2>
+            <p>56px 高，磨砂玻璃。左为品牌、中为段落导航（药片栏目）、右为搜索触发、通知、设置、用户。所有元素都在等高线上对齐。</p>
+          </header>
+
+          <div class="shell-frame" data-rows="just-content" style="background: linear-gradient(180deg, var(--bg-canvas) 0%, var(--bg-canvas) 56px, var(--bg-sunken) 56px); min-height: 130px;">
+            <header class="vew-topbar">
+              <a class="vew-topbar-brand" href="#">
+                <svg class="vew-topbar-mark brand-svg" aria-hidden="true"><use href="#vew-mark"/></svg>
+                <span class="vew-topbar-name">VEW</span>
+              </a>
+              <nav class="vew-topbar-nav">
+                <a href="#" aria-current="page"><svg><use href="#ic-grid"/></svg>浏览</a>
+                <a href="#"><svg><use href="#ic-stack"/></svg>合集</a>
+                <a href="#"><svg><use href="#ic-user"/></svg>创作者</a>
+                <a href="#"><svg><use href="#ic-down"/></svg>下载</a>
+              </nav>
+              <div class="vew-topbar-actions">
+                <button class="vew-search-trigger" id="search-trigger-1" type="button">
+                  <svg><use href="#ic-search"/></svg>
+                  <span class="placeholder">搜索你的收藏…</span>
+                  <span class="hint"><span class="kbd-mini">⌘</span><span class="kbd-mini">K</span></span>
+                </button>
+                <button class="icon-btn vew-notif-btn" data-unread="true" aria-label="notifications"><svg viewBox="0 0 24 24"><use href="#ic-bell"/></svg></button>
+                <button class="icon-btn" aria-label="settings"><svg viewBox="0 0 24 24"><use href="#ic-settings"/></svg></button>
+                <span class="avatar" style="background: linear-gradient(135deg, oklch(0.55 0.08 30), oklch(0.35 0.06 250));" data-size="sm">VW</span>
+              </div>
+            </header>
+          </div>
+        </section>
+
+        <!-- ── 02 App Shell ──────────────────────────────────── -->
+        <section id="shell" class="pr-section">
+          <header class="section-head">
+            <div class="num">02 · App Shell</div>
+            <h2>完整骨架</h2>
+            <p>顶栏 + 左侧侧栏 + 主区。侧栏分组：库（默认入口）/ 合集（用户自定义）/ 标签（带色块）/ 底部存储指示。</p>
+          </header>
+
+          <div class="shell-frame">
+            <header class="vew-topbar">
+              <a class="vew-topbar-brand" href="#">
+                <svg class="vew-topbar-mark brand-svg" aria-hidden="true"><use href="#vew-mark"/></svg>
+                <span class="vew-topbar-name">VEW</span>
+              </a>
+              <nav class="vew-topbar-nav">
+                <a href="#" aria-current="page"><svg><use href="#ic-grid"/></svg>浏览</a>
+                <a href="#"><svg><use href="#ic-stack"/></svg>合集</a>
+                <a href="#"><svg><use href="#ic-user"/></svg>创作者</a>
+                <a href="#"><svg><use href="#ic-down"/></svg>下载</a>
+              </nav>
+              <div class="vew-topbar-actions">
+                <button class="vew-search-trigger" id="search-trigger-2" type="button">
+                  <svg><use href="#ic-search"/></svg>
+                  <span class="placeholder">搜索…</span>
+                  <span class="hint"><span class="kbd-mini">⌘</span><span class="kbd-mini">K</span></span>
+                </button>
+                <button class="icon-btn vew-notif-btn" data-unread="true" aria-label="notifications"><svg viewBox="0 0 24 24"><use href="#ic-bell"/></svg></button>
+                <span class="avatar" style="background: linear-gradient(135deg, oklch(0.55 0.08 30), oklch(0.35 0.06 250));" data-size="sm">VW</span>
+              </div>
+            </header>
+            <div class="shell-body">
+              <aside class="vew-sidenav">
+                <div class="vew-sidenav-group">
+                  <span class="vew-sidenav-label">库</span>
+                  <a class="vew-sidenav-item" href="#" aria-current="page"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-home"/></svg></span><span>所有视频</span><span class="si-count">324</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></span><span>已喜欢</span><span class="si-count">42</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-clock"/></svg></span><span>最近观看</span><span class="si-count">18</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-down"/></svg></span><span>下载</span><span class="si-count">3</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-trash"/></svg></span><span>回收站</span><span class="si-count">7</span></a>
+                </div>
+
+                <div class="vew-sidenav-group">
+                  <span class="vew-sidenav-label">合集 <button class="add" aria-label="add collection"><svg width="12" height="12" viewBox="0 0 24 24"><use href="#ic-plus"/></svg></button></span>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-stack"/></svg></span><span>夜晚摄影</span><span class="si-count">27</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-stack"/></svg></span><span>自然纪录</span><span class="si-count">12</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-stack"/></svg></span><span>动效灵感</span><span class="si-count">43</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon"><svg viewBox="0 0 24 24"><use href="#ic-stack"/></svg></span><span>待看</span><span class="si-count">8</span></a>
+                </div>
+
+                <div class="vew-sidenav-group">
+                  <span class="vew-sidenav-label">标签</span>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon" style="color: oklch(0.65 0.10 30);"><span class="si-swatch"></span></span><span>摄影</span><span class="si-count">68</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon" style="color: oklch(0.65 0.10 150);"><span class="si-swatch"></span></span><span>动效</span><span class="si-count">31</span></a>
+                  <a class="vew-sidenav-item" href="#"><span class="si-icon" style="color: oklch(0.65 0.10 270);"><span class="si-swatch"></span></span><span>访谈</span><span class="si-count">14</span></a>
+                </div>
+
+                <div class="vew-sidenav-footer" style="--fill: 38%;">
+                  <div class="label"><span>本地存储</span><span class="val">42.1 / 128 GB</span></div>
+                  <div class="bar"></div>
+                </div>
+              </aside>
+
+              <section class="shell-main">
+                <header class="shell-main-head">
+                  <div>
+                    <h1>所有视频</h1>
+                    <span class="sub">324 个 · 排序：最近添加</span>
+                  </div>
+                  <div style="display:flex; gap: var(--space-2); align-items: center;">
+                    <button class="btn" data-variant="secondary" data-size="sm">排序 ▾</button>
+                    <button class="btn" data-variant="secondary" data-size="sm">筛选</button>
+                    <button class="btn" data-variant="primary" data-size="sm">+ 添加</button>
+                  </div>
+                </header>
+
+                <div class="mock-grid">
+                  <article class="vcard"><div class="thumb ph-dusk" data-placeholder><span class="thumb-duration">12:34</span></div><div><h4 class="vcard-title">春日的傍晚 · 街头摄影</h4><div class="vcard-meta"><span class="creator">岚野</span><span class="sep"></span><span>3 天前</span></div></div></article>
+                  <article class="vcard"><div class="thumb ph-forest" data-placeholder><span class="thumb-duration">04:12</span></div><div><h4 class="vcard-title">雾林晨曦 · 自然纪录</h4><div class="vcard-meta"><span class="creator">青松摄</span><span class="sep"></span><span>上周</span></div></div></article>
+                  <article class="vcard"><div class="thumb ph-neon" data-placeholder><span class="thumb-duration">02:47</span></div><div><h4 class="vcard-title">深夜的便利店</h4><div class="vcard-meta"><span class="creator">Aki Sato</span><span class="sep"></span><span>4 月 12 日</span></div></div></article>
+                  <article class="vcard"><div class="thumb ph-warm" data-placeholder><span class="thumb-duration">08:21</span></div><div><h4 class="vcard-title">厨房的光 · 人像练习</h4><div class="vcard-meta"><span class="creator">Linh</span><span class="sep"></span><span>2 月前</span></div></div></article>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 03 Command Palette ──────────────────────────── -->
+        <section id="cmdk" class="pr-section">
+          <header class="section-head">
+            <div class="num">03 · Command Palette</div>
+            <h2>⌘K 命令面板</h2>
+            <p>VEW 的真正心脏。所有视频、合集、创作者、命令都在这里——一个搜索框找到一切。试试 <span class="kbd">⌘</span> <span class="kbd">K</span>。</p>
+          </header>
+
+          <div class="shell-frame" data-rows="just-content" style="min-height: 520px; background: var(--bg-sunken);">
+            <span class="frame-label">Static preview</span>
+            <div style="display: flex; align-items: flex-start; justify-content: center; padding-top: var(--space-7);">
+              <div class="cmd-palette" style="animation: none;">
+                <div class="cmd-input-wrap">
+                  <svg><use href="#ic-search"/></svg>
+                  <input class="cmd-input" placeholder="搜索视频 · 合集 · 创作者，或者输入命令…" value="春" />
+                  <span class="cmd-hint"><span class="kbd-mini">esc</span></span>
+                </div>
+                <div class="cmd-results">
+
+                  <div class="cmd-group-label">视频</div>
+                  <button class="cmd-item" data-active="true">
+                    <span class="cmd-item-leading thumb-mini ph-dusk"></span>
+                    <div class="cmd-item-body">
+                      <div class="cmd-item-title"><mark>春</mark>日的傍晚 · 街头摄影手记</div>
+                      <div class="cmd-item-sub">岚野 · YouTube · 12:34</div>
+                    </div>
+                    <div class="cmd-item-trail">
+                      <span class="kbd-mini">↵</span>
+                    </div>
+                  </button>
+                  <button class="cmd-item">
+                    <span class="cmd-item-leading thumb-mini ph-meadow" style="--placeholder-bg: linear-gradient(180deg, oklch(0.62 0.10 130) 0%, oklch(0.35 0.06 150) 100%);"></span>
+                    <div class="cmd-item-body">
+                      <div class="cmd-item-title">早<mark>春</mark>的麦田</div>
+                      <div class="cmd-item-sub">阿野 · YouTube · 06:11</div>
+                    </div>
+                  </button>
+
+                  <div class="cmd-group-label">合集</div>
+                  <button class="cmd-item">
+                    <span class="cmd-item-leading"><svg><use href="#ic-stack"/></svg></span>
+                    <div class="cmd-item-body">
+                      <div class="cmd-item-title"><mark>春</mark>夏秋冬</div>
+                      <div class="cmd-item-sub">12 个视频</div>
+                    </div>
+                  </button>
+
+                  <div class="cmd-group-label">命令</div>
+                  <button class="cmd-item">
+                    <span class="cmd-item-leading"><svg><use href="#ic-link"/></svg></span>
+                    <div class="cmd-item-body">
+                      <div class="cmd-item-title">添加视频：<mark>春</mark>…</div>
+                      <div class="cmd-item-sub">如果是链接，回车直接保存</div>
+                    </div>
+                    <div class="cmd-item-trail">
+                      <span class="kbd-mini">⌘N</span>
+                    </div>
+                  </button>
+                  <button class="cmd-item">
+                    <span class="cmd-item-leading"><svg><use href="#ic-search"/></svg></span>
+                    <div class="cmd-item-body">
+                      <div class="cmd-item-title">在所有备注中搜索 "<mark>春</mark>"</div>
+                      <div class="cmd-item-sub">全文检索</div>
+                    </div>
+                  </button>
+                </div>
+                <div class="cmd-foot">
+                  <div class="cmd-foot-keys">
+                    <span><span class="kbd-mini">↑↓</span> 移动</span>
+                    <span><span class="kbd-mini">↵</span> 打开</span>
+                    <span><span class="kbd-mini">⌘↵</span> 在新窗口</span>
+                  </div>
+                  <div class="cmd-foot-keys">
+                    <span>VEW</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: var(--space-4); display: flex; gap: var(--space-3); align-items: center;">
+            <button class="btn" data-variant="primary" id="open-cmdk">打开 ⌘K</button>
+            <span class="t-small t-tertiary">或者直接按 <span class="kbd">⌘</span> <span class="kbd">K</span></span>
+          </div>
+        </section>
+
+        <!-- ── 04 Batch Bar ────────────────────────────────── -->
+        <section id="batch" class="pr-section">
+          <header class="section-head">
+            <div class="num">04 · Batch Action Bar</div>
+            <h2>批量工具栏</h2>
+            <p>选中任意视频卡时，从底部中央滑入。所有操作集中在一处，不抢顶栏的位置。</p>
+          </header>
+
+          <div class="shell-frame" data-rows="just-content" style="min-height: 280px; background: var(--bg-sunken); padding: var(--space-6); display: flex; align-items: flex-end; justify-content: center;">
+            <span class="frame-label">Static preview</span>
+            <div class="batch-bar" style="position: relative; left: auto; bottom: auto; transform: none; animation: none;">
+              <span class="count"><strong>3</strong>个已选</span>
+              <span class="sep"></span>
+              <div class="batch-bar-actions">
+                <button class="icon-btn" data-tooltip="加入合集"><svg viewBox="0 0 24 24"><use href="#ic-stack"/></svg></button>
+                <button class="icon-btn" data-tooltip="添加标签"><svg viewBox="0 0 24 24"><use href="#ic-tag"/></svg></button>
+                <button class="icon-btn" data-tooltip="下载"><svg viewBox="0 0 24 24"><use href="#ic-down"/></svg></button>
+                <button class="icon-btn" data-tone="danger" data-tooltip="删除"><svg viewBox="0 0 24 24"><use href="#ic-trash"/></svg></button>
+              </div>
+              <span class="sep"></span>
+              <button class="icon-btn" data-size="sm" data-tooltip="退出"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+            </div>
+          </div>
+
+          <div style="margin-top: var(--space-4); display: flex; gap: var(--space-3); align-items: center;">
+            <button class="btn" data-variant="primary" id="show-batch">显示工具栏 5 秒</button>
+          </div>
+        </section>
+
+        <!-- ── 05 Task Pill ────────────────────────────────── -->
+        <section id="task" class="pr-section">
+          <header class="section-head">
+            <div class="num">05 · Task Pill</div>
+            <h2>任务指示</h2>
+            <p>后台正在跑下载或解析时浮在右下。一个 28px 的圆环 + 一句话。点击展开完整下载列表抽屉。</p>
+          </header>
+
+          <div class="shell-frame" data-rows="just-content" style="min-height: 180px; background: var(--bg-sunken); padding: var(--space-6); position: relative;">
+            <span class="frame-label">Static preview</span>
+            <div class="task-pill" style="position: absolute; right: 20px; bottom: 20px;">
+              <span class="task-pill-progress">
+                <svg viewBox="0 0 28 28">
+                  <circle class="bg" cx="14" cy="14" r="12"/>
+                  <circle class="fg" cx="14" cy="14" r="12" style="stroke-dashoffset: 26.4;"/>
+                </svg>
+                <span class="val">65%</span>
+              </span>
+              <div class="task-pill-body">
+                正在下载 2 个视频
+                <div class="sub">4.2 MB/s · 剩余 1 分 47 秒</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: var(--space-4);">
+            <button class="btn" data-variant="primary" id="show-task">浮出任务卡 6 秒</button>
+          </div>
+        </section>
+
+        <!-- ── 06 Player ──────────────────────────────────── -->
+        <section id="player" class="pr-section">
+          <header class="section-head">
+            <div class="num">06 · Player</div>
+            <h2>播放器</h2>
+            <p>VEW 的灵魂。控制栏 3 秒无操作自动淡出；进度条 2px（hover 4px）；进度色用白不用品牌色——把视觉中心永远留给画面。试试悬停进度条看缩略预览，按右侧切换状态查看 loading / buffering / error。</p>
+          </header>
+
+          <div class="player-demo">
+            <div>
+              <div class="player" id="player" data-state="ready">
+                <!-- Backdrop (blurred frame) -->
+                <div class="player-backdrop" style="background-image: linear-gradient(180deg, oklch(0.42 0.06 30) 0%, oklch(0.28 0.04 250) 60%, oklch(0.20 0.03 260) 100%);"></div>
+                <!-- Mock "video" surface -->
+                <div class="video-mock"></div>
+
+                <!-- Fades -->
+                <div class="player-fade-top"></div>
+                <div class="player-fade-bottom"></div>
+
+                <!-- Title bar -->
+                <div class="player-title">
+                  <div>
+                    <h3>春日的傍晚 · 街头摄影手记</h3>
+                    <div class="meta">岚野 · YouTube · 12:34</div>
+                  </div>
+                  <div class="player-title-actions">
+                    <button class="pi-btn" data-tooltip="访问原网页"><svg viewBox="0 0 24 24"><use href="#ic-link"/></svg></button>
+                    <button class="pi-btn" data-tooltip="更多"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+                    <button class="pi-btn" data-tooltip="关闭"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+                  </div>
+                </div>
+
+                <!-- Big play (ready / paused) -->
+                <button class="player-bigplay" aria-label="play">
+                  <span class="player-bigplay-disc"><svg viewBox="0 0 24 24"><use href="#ic-play"/></svg></span>
+                </button>
+
+                <!-- Loading -->
+                <div class="player-loading"><span class="ring"></span></div>
+                <div class="player-buffering-label">buffering…</div>
+
+                <!-- Error -->
+                <div class="player-error">
+                  <span class="err-icon"><svg viewBox="0 0 24 24"><use href="#ic-err"/></svg></span>
+                  <h4 class="err-title">视频源暂时打不开</h4>
+                  <p class="err-sub">代理可能挂了，也可能是原平台限制。你的本地数据安然无恙。</p>
+                  <div class="err-actions">
+                    <button class="btn" data-size="sm" data-variant="secondary"><svg class="btn-icon" viewBox="0 0 24 24"><use href="#ic-retry"/></svg>重试</button>
+                    <button class="btn" data-size="sm" data-variant="ghost">查看日志</button>
+                  </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="player-controls">
+                  <div class="player-progress" id="progress">
+                    <div class="player-progress-track">
+                      <div class="player-progress-buffer" style="width: 58%;"></div>
+                      <div class="player-progress-fill" id="progress-fill" style="width: 32%;"></div>
+                    </div>
+                    <div class="player-progress-thumb" id="progress-thumb" style="left: 32%;"></div>
+                    <!-- chapter marks -->
+                    <div class="player-mark" style="left: 12%;"></div>
+                    <div class="player-mark" style="left: 27%;" data-tone="accent" data-tooltip="bookmark 02:34"></div>
+                    <div class="player-mark" style="left: 51%;"></div>
+                    <div class="player-mark" style="left: 78%;"></div>
+
+                    <!-- scrub preview -->
+                    <div class="player-scrub-preview" id="scrub-preview" style="display: none; left: 40%;">
+                      <div class="player-scrub-thumb" style="background-image: linear-gradient(180deg, oklch(0.42 0.06 30) 0%, oklch(0.28 0.04 250) 60%, oklch(0.20 0.03 260) 100%);"></div>
+                      <div class="player-scrub-time">04:58</div>
+                    </div>
+                  </div>
+
+                  <div class="player-bar">
+                    <div class="player-bar-left">
+                      <button class="player-btn" data-tooltip="上一个"><svg viewBox="0 0 24 24"><use href="#ic-skip-prev"/></svg></button>
+                      <button class="player-btn" data-size="lg" data-tooltip="播放 · Space" id="play-btn"><svg viewBox="0 0 24 24"><use href="#ic-play"/></svg></button>
+                      <button class="player-btn" data-tooltip="下一个"><svg viewBox="0 0 24 24"><use href="#ic-skip-next"/></svg></button>
+                      <div class="player-volume">
+                        <button class="player-btn" data-tooltip="音量 · M"><svg viewBox="0 0 24 24"><use href="#ic-vol"/></svg></button>
+                        <span class="slider"><input type="range" min="0" max="100" value="72" /></span>
+                      </div>
+                      <span class="player-time"><span id="cur-time">04:01</span><span class="sep">/</span><span>12:34</span></span>
+                    </div>
+                    <div></div>
+                    <div class="player-bar-right">
+                      <button class="player-pill" data-tooltip="播放速度">1.0×</button>
+                      <button class="player-pill" data-tooltip="清晰度">1080p</button>
+                      <button class="player-btn" data-tooltip="字幕 · C"><svg viewBox="0 0 24 24"><use href="#ic-cc"/></svg></button>
+                      <button class="player-btn" data-tooltip="画中画"><svg viewBox="0 0 24 24"><use href="#ic-pip"/></svg></button>
+                      <button class="player-btn" data-tooltip="全屏 · F"><svg viewBox="0 0 24 24"><use href="#ic-fs"/></svg></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="player-state-panel">
+              <div class="lbl">状态切换</div>
+              <div class="opts" id="state-opts">
+                <button data-set-state="ready"     aria-pressed="true">就绪</button>
+                <button data-set-state="playing">播放中</button>
+                <button data-set-state="paused">已暂停</button>
+                <button data-set-state="loading">加载中</button>
+                <button data-set-state="buffering">缓冲</button>
+                <button data-set-state="error">错误</button>
+              </div>
+              <div class="lbl" style="margin-top: var(--space-3);">键盘</div>
+              <ul style="margin: 0; padding: 0; list-style: none; display: grid; gap: 6px;">
+                <li style="display:flex; justify-content: space-between; font-size: var(--text-caption); color: var(--text-secondary);"><span>播放</span><span class="kbd">Space</span></li>
+                <li style="display:flex; justify-content: space-between; font-size: var(--text-caption); color: var(--text-secondary);"><span>±10 秒</span><span class="kbd">← →</span></li>
+                <li style="display:flex; justify-content: space-between; font-size: var(--text-caption); color: var(--text-secondary);"><span>静音</span><span class="kbd">M</span></li>
+                <li style="display:flex; justify-content: space-between; font-size: var(--text-caption); color: var(--text-secondary);"><span>全屏</span><span class="kbd">F</span></li>
+                <li style="display:flex; justify-content: space-between; font-size: var(--text-caption); color: var(--text-secondary);"><span>字幕</span><span class="kbd">C</span></li>
+              </ul>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ── 07 Mini Player ─────────────────────────────── -->
+        <section id="mini" class="pr-section">
+          <header class="section-head">
+            <div class="num">07 · Mini Player</div>
+            <h2>迷你播放器</h2>
+            <p>当你滚出主播放器时，自动收纳到右下。仍然能控制，但永远不抢镜。点开放大、点叉收起。</p>
+          </header>
+
+          <div class="shell-frame" data-rows="just-content" style="min-height: 320px; background: var(--bg-sunken); padding: var(--space-6); position: relative;">
+            <span class="frame-label">Static preview</span>
+            <div class="mini-player" style="position: absolute; right: 24px; bottom: 24px;">
+              <div class="mini-player-media">
+                <div class="video-mock" style="background:
+                  radial-gradient(ellipse at 40% 30%, oklch(0.55 0.10 30) 0%, transparent 55%),
+                  radial-gradient(ellipse at 75% 75%, oklch(0.42 0.06 250) 0%, transparent 50%),
+                  linear-gradient(180deg, oklch(0.22 0.05 260) 0%, oklch(0.10 0.02 250) 100%);"></div>
+                <div class="mini-player-progress"><div style="width: 32%;"></div></div>
+              </div>
+              <div class="mini-player-body">
+                <div>
+                  <h4 class="mini-player-title">春日的傍晚 · 街头摄影手记</h4>
+                  <div class="mini-player-sub">岚野 · 04:01 / 12:34</div>
+                </div>
+                <div class="mini-player-controls">
+                  <button class="icon-btn" data-size="sm" aria-label="play"><svg viewBox="0 0 24 24"><use href="#ic-pause"/></svg></button>
+                  <button class="icon-btn" data-size="sm" aria-label="expand"><svg viewBox="0 0 24 24"><use href="#ic-expand"/></svg></button>
+                  <button class="icon-btn" data-size="sm" aria-label="close"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="foot">
+          <span>VEW · Pass 3b · <span class="t-mono">chrome + player v0.1</span></span>
+          <span>← <a href="cards.html">Cards</a> · 设计系统初版完成 🎐</span>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <!-- Live overlay mount points -->
+  <div id="overlay-host"></div>
+  <div id="float-host"></div>
+
+  <script src="src/theme.js"></script>
+  <script src="src/i18n.js"></script>
+  <script>
+    /* Theme segment */
+    function syncThemeSegment() {
+      const mode = document.documentElement.dataset.themeMode || 'dark';
+      document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.themeSet === mode ? 'true' : 'false'));
+    }
+    document.querySelectorAll('[data-theme-set]').forEach((b) => b.addEventListener('click', () => { window.VEWTheme.set(b.dataset.themeSet); syncThemeSegment(); }));
+    syncThemeSegment();
+
+    /* TOC active */
+    (function () {
+      const links = document.querySelectorAll('[data-toc]');
+      const map = {}; links.forEach((l) => (map[l.dataset.toc] = l));
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove('active'));
+            const id = e.target.id;
+            if (map[id]) map[id].classList.add('active');
+          }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      ['topbar','shell','cmdk','batch','task','player','mini'].forEach((id) => {
+        const el = document.getElementById(id); if (el) obs.observe(el);
+      });
+    })();
+
+    /* ── Player interactions ─────────────────────────────── */
+    const player = document.getElementById('player');
+    const stateOpts = document.getElementById('state-opts');
+    const playBtn = document.getElementById('play-btn');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progress-fill');
+    const progressThumb = document.getElementById('progress-thumb');
+    const scrubPreview = document.getElementById('scrub-preview');
+    const scrubTime = scrubPreview.querySelector('.player-scrub-time');
+    const curTime = document.getElementById('cur-time');
+    const DURATION = 754; // 12:34
+
+    function fmt(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = Math.floor(sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    let currentSec = 241; // 04:01
+    let playing = false;
+    let timer = null;
+    function setState(s) {
+      player.dataset.state = s;
+      // sync segmented buttons
+      stateOpts.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.setState === s ? 'true' : 'false'));
+      // sync play icon
+      const isPlaying = s === 'playing';
+      playBtn.innerHTML = `<svg viewBox="0 0 24 24"><use href="#${isPlaying ? 'ic-pause' : 'ic-play'}"/></svg>`;
+      playing = isPlaying;
+      if (isPlaying) startTick(); else stopTick();
+    }
+    function startTick() {
+      stopTick();
+      timer = setInterval(() => {
+        currentSec = (currentSec + 0.5) % DURATION;
+        const pct = (currentSec / DURATION) * 100;
+        progressFill.style.width = pct + '%';
+        progressThumb.style.left = pct + '%';
+        curTime.textContent = fmt(currentSec);
+      }, 500);
+    }
+    function stopTick() { if (timer) { clearInterval(timer); timer = null; } }
+
+    stateOpts.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => setState(b.dataset.setState)));
+    playBtn.addEventListener('click', () => setState(playing ? 'paused' : 'playing'));
+
+    /* Scrub preview */
+    progress.addEventListener('mousemove', (e) => {
+      const rect = progress.getBoundingClientRect();
+      const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+      const pct = (x / rect.width) * 100;
+      const sec = (pct / 100) * DURATION;
+      scrubPreview.style.display = 'grid';
+      scrubPreview.style.left = pct + '%';
+      scrubTime.textContent = fmt(sec);
+    });
+    progress.addEventListener('mouseleave', () => { scrubPreview.style.display = 'none'; });
+    progress.addEventListener('click', (e) => {
+      const rect = progress.getBoundingClientRect();
+      const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+      const pct = (x / rect.width) * 100;
+      currentSec = (pct / 100) * DURATION;
+      progressFill.style.width = pct + '%';
+      progressThumb.style.left = pct + '%';
+      curTime.textContent = fmt(currentSec);
+    });
+
+    /* Idle auto-hide controls */
+    let idleTimer = null;
+    function resetIdle() {
+      player.removeAttribute('data-idle');
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => { if (playing) player.setAttribute('data-idle', 'true'); }, 3000);
+    }
+    player.addEventListener('mousemove', resetIdle);
+    player.addEventListener('mouseleave', () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      if (playing) player.setAttribute('data-idle', 'true');
+    });
+    player.addEventListener('mouseenter', resetIdle);
+
+    /* Keyboard */
+    document.addEventListener('keydown', (e) => {
+      // ignore when typing in inputs
+      if (e.target.matches('input, textarea')) return;
+      if (e.key === ' ') {
+        if (player.dataset.state === 'playing' || player.dataset.state === 'paused' || player.dataset.state === 'ready') {
+          setState(playing ? 'paused' : 'playing'); e.preventDefault();
+        }
+      } else if (e.key === 'ArrowRight') {
+        currentSec = Math.min(DURATION, currentSec + 10);
+        const pct = (currentSec / DURATION) * 100;
+        progressFill.style.width = pct + '%';
+        progressThumb.style.left = pct + '%';
+        curTime.textContent = fmt(currentSec);
+      } else if (e.key === 'ArrowLeft') {
+        currentSec = Math.max(0, currentSec - 10);
+        const pct = (currentSec / DURATION) * 100;
+        progressFill.style.width = pct + '%';
+        progressThumb.style.left = pct + '%';
+        curTime.textContent = fmt(currentSec);
+      }
+    });
+
+    /* ── Command Palette ─────────────────────────────────── */
+    function openCmdK() {
+      if (document.querySelector('.cmd-scrim')) return;
+      const scrim = document.createElement('div');
+      scrim.className = 'cmd-scrim';
+      scrim.innerHTML = `
+        <div class="cmd-palette">
+          <div class="cmd-input-wrap">
+            <svg><use href="#ic-search"/></svg>
+            <input class="cmd-input" placeholder="搜索视频 · 合集 · 创作者，或输入命令…" autofocus />
+            <span class="cmd-hint"><span class="kbd-mini">esc</span></span>
+          </div>
+          <div class="cmd-results">
+            <div class="cmd-group-label">最近</div>
+            <button class="cmd-item" data-active="true">
+              <span class="cmd-item-leading thumb-mini" style="--placeholder-bg: linear-gradient(180deg, oklch(0.42 0.06 30) 0%, oklch(0.28 0.04 250) 60%, oklch(0.20 0.03 260) 100%);"></span>
+              <div class="cmd-item-body"><div class="cmd-item-title">春日的傍晚 · 街头摄影手记</div><div class="cmd-item-sub">岚野 · YouTube · 12:34</div></div>
+              <div class="cmd-item-trail"><span class="kbd-mini">↵</span></div>
+            </button>
+            <button class="cmd-item">
+              <span class="cmd-item-leading thumb-mini" style="--placeholder-bg: radial-gradient(ellipse at 30% 80%, oklch(0.48 0.06 150) 0%, oklch(0.20 0.02 180) 70%);"></span>
+              <div class="cmd-item-body"><div class="cmd-item-title">雾林晨曦</div><div class="cmd-item-sub">青松摄 · Bilibili · 04:12</div></div>
+            </button>
+            <div class="cmd-group-label">命令</div>
+            <button class="cmd-item">
+              <span class="cmd-item-leading"><svg><use href="#ic-link"/></svg></span>
+              <div class="cmd-item-body"><div class="cmd-item-title">添加视频…</div><div class="cmd-item-sub">从链接</div></div>
+              <div class="cmd-item-trail"><span class="kbd-mini">⌘N</span></div>
+            </button>
+            <button class="cmd-item">
+              <span class="cmd-item-leading"><svg><use href="#ic-stack"/></svg></span>
+              <div class="cmd-item-body"><div class="cmd-item-title">新建合集…</div></div>
+              <div class="cmd-item-trail"><span class="kbd-mini">⌘⇧N</span></div>
+            </button>
+            <button class="cmd-item">
+              <span class="cmd-item-leading"><svg><use href="#ic-settings"/></svg></span>
+              <div class="cmd-item-body"><div class="cmd-item-title">设置</div></div>
+              <div class="cmd-item-trail"><span class="kbd-mini">⌘,</span></div>
+            </button>
+          </div>
+          <div class="cmd-foot">
+            <div class="cmd-foot-keys">
+              <span><span class="kbd-mini">↑↓</span> 移动</span>
+              <span><span class="kbd-mini">↵</span> 打开</span>
+              <span><span class="kbd-mini">⌘↵</span> 新窗口</span>
+            </div>
+            <span>VEW</span>
+          </div>
+        </div>
+      `;
+      document.getElementById('overlay-host').appendChild(scrim);
+      setTimeout(() => scrim.querySelector('.cmd-input')?.focus(), 50);
+      function close() {
+        scrim.remove();
+        window.removeEventListener('keydown', onKey);
+      }
+      function onKey(e) {
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          const items = [...scrim.querySelectorAll('.cmd-item')];
+          const active = scrim.querySelector('.cmd-item[data-active="true"]');
+          let idx = items.indexOf(active);
+          idx = (idx + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+          items.forEach((it) => it.removeAttribute('data-active'));
+          items[idx].dataset.active = 'true';
+          items[idx].scrollIntoViewIfNeeded ? items[idx].scrollIntoViewIfNeeded() : items[idx].scrollIntoView({ block: 'nearest' });
+          e.preventDefault();
+        }
+      }
+      window.addEventListener('keydown', onKey);
+      scrim.addEventListener('click', (e) => { if (e.target === scrim) close(); });
+    }
+    document.getElementById('open-cmdk').addEventListener('click', openCmdK);
+    document.getElementById('search-trigger-1').addEventListener('click', openCmdK);
+    document.getElementById('search-trigger-2').addEventListener('click', openCmdK);
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openCmdK();
+      }
+    });
+
+    /* ── Batch & Task floats ─────────────────────────────── */
+    document.getElementById('show-batch').addEventListener('click', () => {
+      const old = document.querySelector('#float-host .batch-bar.live'); if (old) old.remove();
+      const el = document.createElement('div');
+      el.className = 'batch-bar live';
+      el.innerHTML = `
+        <span class="count"><strong>3</strong>个已选</span>
+        <span class="sep"></span>
+        <div class="batch-bar-actions">
+          <button class="icon-btn" data-tooltip="加入合集"><svg viewBox="0 0 24 24"><use href="#ic-stack"/></svg></button>
+          <button class="icon-btn" data-tooltip="添加标签"><svg viewBox="0 0 24 24"><use href="#ic-tag"/></svg></button>
+          <button class="icon-btn" data-tooltip="下载"><svg viewBox="0 0 24 24"><use href="#ic-down"/></svg></button>
+          <button class="icon-btn" data-tone="danger" data-tooltip="删除"><svg viewBox="0 0 24 24"><use href="#ic-trash"/></svg></button>
+        </div>
+        <span class="sep"></span>
+        <button class="icon-btn" data-size="sm" id="batch-close" data-tooltip="退出"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+      `;
+      document.getElementById('float-host').appendChild(el);
+      const closeFn = () => el.remove();
+      el.querySelector('#batch-close').addEventListener('click', closeFn);
+      setTimeout(closeFn, 5000);
+    });
+
+    document.getElementById('show-task').addEventListener('click', () => {
+      const old = document.querySelector('#float-host .task-pill.live'); if (old) old.remove();
+      const el = document.createElement('div');
+      el.className = 'task-pill live';
+      el.innerHTML = `
+        <span class="task-pill-progress">
+          <svg viewBox="0 0 28 28">
+            <circle class="bg" cx="14" cy="14" r="12"/>
+            <circle class="fg" cx="14" cy="14" r="12" style="stroke-dashoffset: 50;"/>
+          </svg>
+          <span class="val">34%</span>
+        </span>
+        <div class="task-pill-body">
+          正在下载 2 个视频
+          <div class="sub">3.8 MB/s · 剩余 2 分 12 秒</div>
+        </div>
+      `;
+      document.getElementById('float-host').appendChild(el);
+      // simulate progress
+      let pct = 34;
+      const fg = el.querySelector('.fg');
+      const val = el.querySelector('.val');
+      const C = 75.4;
+      const t = setInterval(() => {
+        pct = Math.min(100, pct + 4);
+        fg.style.strokeDashoffset = (C * (1 - pct / 100)).toString();
+        val.textContent = pct + '%';
+        if (pct >= 100) { clearInterval(t); setTimeout(() => el.remove(), 800); }
+      }, 600);
+      setTimeout(() => { clearInterval(t); el.remove(); }, 6000);
+    });
+  </script>
+</body>
+</html>

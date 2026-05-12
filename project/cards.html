@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VEW · 卡片家族</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,16..72,400;0,16..72,500;0,16..72,600;1,16..72,400&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="src/tokens.css" />
+  <link rel="stylesheet" href="src/primitives.css" />
+  <link rel="stylesheet" href="src/feedback.css" />
+  <link rel="stylesheet" href="src/cards.css" />
+
+  <style>
+    /* Page chrome (kept tight; reuses tokens) */
+    .shell { max-width: 1200px; margin: 0 auto; padding: var(--space-7) var(--space-6) var(--space-10); }
+    @media (min-width: 1280px) { .shell { padding-left: var(--space-8); padding-right: var(--space-8); } }
+
+    .topbar { position: sticky; top: 0; z-index: var(--z-sticky); backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%); background: color-mix(in oklch, var(--bg-canvas) 78%, transparent); border-bottom: 1px solid var(--line-hairline); }
+    .topbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-6); height: 56px; }
+    .brand { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-mark { width: 24px; height: 24px; display: inline-flex; }
+    .brand-name { font-family: var(--font-ui); font-size: 17px; letter-spacing: -0.02em; font-weight: var(--weight-medium); }
+    .brand-divider { width: 1px; height: 16px; background: var(--line-soft); margin: 0 var(--space-3); }
+    .brand-section { font-size: var(--text-small); color: var(--text-secondary); letter-spacing: var(--tracking-wide); }
+    .controls { display: flex; align-items: center; gap: var(--space-3); }
+    .segment { display: inline-flex; align-items: center; padding: 2px; background: var(--bg-surface); border: 1px solid var(--line-hairline); border-radius: var(--radius-full); gap: 2px; }
+    .segment button { appearance: none; border: 0; cursor: pointer; padding: 4px 10px; font: inherit; font-size: var(--text-caption); line-height: 1; color: var(--text-secondary); background: transparent; border-radius: var(--radius-full); transition: color var(--duration-1) var(--ease-swift), background var(--duration-1) var(--ease-swift); }
+    .segment button:hover { color: var(--text-primary); }
+    .segment button[aria-pressed="true"] { background: var(--bg-raised); color: var(--text-primary); box-shadow: 0 0 0 1px var(--line-soft) inset; }
+    .top-back { color: var(--text-tertiary); text-decoration: none; font-size: var(--text-small); transition: color var(--duration-1) var(--ease-swift); }
+    .top-back:hover { color: var(--text-primary); }
+
+    .hero { padding-top: var(--space-7); padding-bottom: var(--space-7); border-bottom: 1px solid var(--line-hairline); }
+    .eyebrow { font-size: var(--text-micro); font-weight: var(--weight-medium); letter-spacing: var(--tracking-uppercase); text-transform: uppercase; color: var(--text-tertiary); margin-bottom: var(--space-4); }
+    .hero h1 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: clamp(34px, 4.5vw, 48px); line-height: 1.14; letter-spacing: var(--tracking-tight); margin: 0 0 var(--space-5); color: var(--text-primary); max-width: 26ch; }
+    .hero p { font-size: var(--text-lg); line-height: var(--lh-lg); color: var(--text-secondary); max-width: 62ch; margin: 0; }
+
+    section.pr-section { padding: var(--space-7) 0; border-bottom: 1px solid var(--line-hairline); }
+    section.pr-section:last-of-type { border-bottom: 0; }
+    .section-head { margin-bottom: var(--space-5); display: grid; gap: var(--space-2); }
+    .section-head .num { font-family: var(--font-mono); font-size: var(--text-caption); color: var(--text-tertiary); }
+    .section-head h2 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--text-h2); line-height: var(--lh-h2); letter-spacing: var(--tracking-tight); margin: 0; }
+    .section-head p { font-size: var(--text-body); color: var(--text-secondary); margin: 0; max-width: 60ch; }
+
+    .layout { display: grid; grid-template-columns: 1fr; gap: var(--space-7); }
+    @media (min-width: 1180px) {
+      .layout { grid-template-columns: 200px 1fr; gap: var(--space-8); }
+      .toc { position: sticky; top: 80px; align-self: start; padding-top: var(--space-7); }
+    }
+    .toc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+    .toc-list a { display: grid; grid-template-columns: 28px 1fr; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); color: var(--text-tertiary); text-decoration: none; font-size: var(--text-small); transition: color var(--duration-1) var(--ease-swift), background var(--duration-1) var(--ease-swift); }
+    .toc-list a:hover { color: var(--text-primary); background: var(--bg-surface); }
+    .toc-list a .n { font-family: var(--font-mono); font-size: 10px; color: var(--text-disabled); }
+    .toc-list a.active { color: var(--text-primary); }
+    .toc-list a.active .n { color: var(--accent); }
+
+    .demo-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+    }
+    .demo-hint {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: var(--text-caption);
+      color: var(--text-tertiary);
+      padding: 4px 10px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-full);
+      margin-bottom: var(--space-4);
+    }
+    .demo-hint::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: vew-pulse 1.4s var(--ease-gentle) infinite;
+    }
+
+    .toolbar-mock {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-canvas);
+      border: 1px solid var(--line-hairline);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+    .toolbar-mock .tm-left { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-small); color: var(--text-secondary); }
+    .toolbar-mock .tm-right { display: flex; align-items: center; gap: var(--space-2); }
+
+    .foot { padding-top: var(--space-7); padding-bottom: var(--space-4); display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; color: var(--text-tertiary); font-size: var(--text-small); }
+    .foot a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--line-soft); transition: color var(--duration-1) var(--ease-swift); }
+    .foot a:hover { color: var(--text-primary); }
+
+    .brand-svg .l-wing { fill: var(--text-primary); }
+    .brand-svg .r-wing { fill: var(--text-primary); opacity: 0.32; }
+
+    /* ── Placeholder thumbnail palettes (atmospheric) ── */
+    .ph-dusk     { --placeholder-bg: linear-gradient(180deg, oklch(0.42 0.06 30) 0%, oklch(0.28 0.04 250) 60%, oklch(0.20 0.03 260) 100%); }
+    .ph-forest   { --placeholder-bg: radial-gradient(ellipse at 30% 80%, oklch(0.48 0.06 150) 0%, oklch(0.20 0.02 180) 70%); }
+    .ph-neon     { --placeholder-bg: radial-gradient(circle at 65% 65%, oklch(0.45 0.16 310) 0%, transparent 60%), linear-gradient(180deg, oklch(0.22 0.05 280) 0%, oklch(0.12 0.02 250) 100%); }
+    .ph-studio   { --placeholder-bg: linear-gradient(135deg, oklch(0.36 0.01 0) 0%, oklch(0.20 0.01 0) 100%); }
+    .ph-warm     { --placeholder-bg: radial-gradient(circle at 30% 40%, oklch(0.58 0.10 60) 0%, oklch(0.22 0.04 30) 70%); }
+    .ph-ocean    { --placeholder-bg: linear-gradient(180deg, oklch(0.48 0.07 230) 0%, oklch(0.18 0.04 240) 100%); }
+    .ph-snow     { --placeholder-bg: linear-gradient(160deg, oklch(0.78 0.02 220) 0%, oklch(0.48 0.03 240) 100%); }
+    .ph-concert  { --placeholder-bg: radial-gradient(circle at 50% 25%, oklch(0.56 0.18 25) 0%, oklch(0.15 0.05 20) 70%); }
+    .ph-meadow   { --placeholder-bg: linear-gradient(180deg, oklch(0.62 0.10 130) 0%, oklch(0.35 0.06 150) 100%); }
+    .ph-clay     { --placeholder-bg: linear-gradient(135deg, oklch(0.58 0.08 50) 0%, oklch(0.38 0.05 30) 100%); }
+    .ph-violet   { --placeholder-bg: linear-gradient(160deg, oklch(0.40 0.10 290) 0%, oklch(0.20 0.05 280) 100%); }
+    .ph-glacier  { --placeholder-bg: linear-gradient(180deg, oklch(0.65 0.04 200) 0%, oklch(0.30 0.04 220) 100%); }
+  </style>
+</head>
+<body>
+
+  <!-- Brand mark -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="vew-mark" viewBox="0 0 120 120">
+        <path class="l-wing" d="M27 22 Q26 18 30 18 L40 18 Q43 18 44 21 L62 86 Q62.5 89 60 89 L52 89 Q49 89 48 86 L27 22 Z"/>
+        <path class="r-wing" d="M93 22 Q94 18 90 18 L80 18 Q77 18 76 21 L58 86 Q57.5 89 60 89 L68 89 Q71 89 72 86 L93 22 Z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- Common icon set inline -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="ic-heart"    viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-more"     viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></symbol>
+      <symbol id="ic-check"    viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-play"     viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></symbol>
+      <symbol id="ic-pause"    viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="0.8" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="0.8" fill="currentColor"/></symbol>
+      <symbol id="ic-close"    viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="ic-retry"    viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-stack"    viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><polyline points="2 17 12 22 22 17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><polyline points="2 12 12 17 22 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-yt"       viewBox="0 0 24 24"><path d="M22 8.2a3 3 0 0 0-2.1-2.1C18.2 5.6 12 5.6 12 5.6s-6.2 0-7.9.5A3 3 0 0 0 2 8.2 31.6 31.6 0 0 0 1.6 12 31.6 31.6 0 0 0 2 15.8a3 3 0 0 0 2.1 2.1c1.7.5 7.9.5 7.9.5s6.2 0 7.9-.5a3 3 0 0 0 2.1-2.1 31.6 31.6 0 0 0 .4-3.8 31.6 31.6 0 0 0-.4-3.8z" fill="currentColor"/><polygon points="10 15.4 15.5 12 10 8.6" fill="oklch(0.15 0 0)"/></symbol>
+      <symbol id="ic-bili"     viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="3" fill="currentColor"/><path d="M7 3l3 3M17 3l-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="9" cy="13" r="1.2" fill="oklch(0.15 0 0)"/><circle cx="15" cy="13" r="1.2" fill="oklch(0.15 0 0)"/></symbol>
+      <symbol id="ic-vimeo"    viewBox="0 0 24 24"><path d="M3 7c1-1 2-2 4-2 1.5 0 2 1 2.5 2.5L11 14c1-2 2-4 3.5-6 1-1.3 2-2 3.5-2 1.4 0 2.5.7 2.5 2.4 0 1.5-1.5 4-3 6-1.6 2-3.5 4-5 4-2 0-3-3-4-7-.6-2-1-3-2-3-.4 0-.8.2-1.2.4L3 7z" fill="currentColor"/></symbol>
+      <symbol id="ic-clock"    viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="12 7 12 12 15.5 13.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="ic-flame"    viewBox="0 0 24 24"><path d="M12 2s4 5 4 9a4 4 0 1 1-8 0c0-1.5 1-3 2-3-1-2 2-6 2-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <svg class="brand-mark brand-svg" aria-hidden="true"><use href="#vew-mark"/></svg>
+        <span class="brand-name">VEW</span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-section">卡片家族</span>
+      </div>
+      <div class="controls">
+        <a href="tokens.html" class="top-back">Tokens</a>
+        <a href="primitives.html" class="top-back">Primitives</a>
+        <a href="feedback.html" class="top-back">← Feedback</a>
+        <div class="segment" role="group" aria-label="Theme">
+          <button data-theme-set="dark">暗</button>
+          <button data-theme-set="light">亮</button>
+          <button data-theme-set="auto">跟随</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Pass 03a · Card Family</div>
+      <h1>静止时一行，悬停时三个。</h1>
+      <p>所有卡片共享一套交互语法。静止时只显露一条信息密度；悬停时浮出三个高频操作；批量选中时所有装饰隐退；八个低频操作藏在"更多"菜单里。变体的差异只在密度与场景。</p>
+      <div class="demo-hint" style="margin-top: var(--space-5);">悬停任意一张卡片查看完整交互</div>
+    </section>
+
+    <div class="layout">
+      <aside class="toc">
+        <ul class="toc-list">
+          <li><a href="#grid"     data-toc="grid"><span class="n">01</span><span>Grid 16:9</span></a></li>
+          <li><a href="#portrait" data-toc="portrait"><span class="n">02</span><span>Portrait 9:16</span></a></li>
+          <li><a href="#list"     data-toc="list"><span class="n">03</span><span>List</span></a></li>
+          <li><a href="#cover"    data-toc="cover"><span class="n">04</span><span>Cover</span></a></li>
+          <li><a href="#collection" data-toc="collection"><span class="n">05</span><span>Collection</span></a></li>
+          <li><a href="#creator"  data-toc="creator"><span class="n">06</span><span>Creator</span></a></li>
+          <li><a href="#download" data-toc="download"><span class="n">07</span><span>Download</span></a></li>
+          <li><a href="#batch"    data-toc="batch"><span class="n">08</span><span>Batch Select</span></a></li>
+          <li><a href="#states"   data-toc="states"><span class="n">09</span><span>Special States</span></a></li>
+        </ul>
+      </aside>
+
+      <div class="content">
+
+        <!-- ── 01 Grid 16:9 ────────────────────────────────────── -->
+        <section id="grid" class="pr-section">
+          <header class="section-head">
+            <div class="num">01 · VideoCard.Grid</div>
+            <h2>主力 16:9 卡</h2>
+            <p>浏览页的默认形态。缩略图 + 时长 + 平台徽标；下方 2 行截断的标题 + 创作者 + 元信息。悬停时缩略图轻微放大、浮现 3 个快捷操作和一个柔光播放圈。</p>
+          </header>
+
+          <div class="demo-panel">
+            <div class="cards-grid">
+
+              <!-- Default · Dusk -->
+              <article class="vcard">
+                <div class="thumb ph-dusk" data-placeholder>
+                  <span class="thumb-platform" title="YouTube"><svg style="color:#ff0000"><use href="#ic-yt"/></svg></span>
+                  <span class="thumb-duration">12:34</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa qa-like" aria-label="like"><svg><use href="#ic-heart"/></svg></button>
+                    <button class="qa qa-save" aria-label="save to collection"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa qa-more" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">春日的傍晚 · 街头摄影手记</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">岚野</span>
+                    <span class="sep"></span>
+                    <span>YouTube</span>
+                    <span class="sep"></span>
+                    <span>3 天前</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Liked · Forest -->
+              <article class="vcard" data-liked="true">
+                <div class="thumb ph-forest" data-placeholder>
+                  <span class="thumb-platform"><svg style="color:#00aeec"><use href="#ic-bili"/></svg></span>
+                  <span class="thumb-duration">04:12</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa qa-like" data-tone="liked" aria-label="liked"><svg style="fill:currentColor;stroke:none"><use href="#ic-heart"/></svg></button>
+                    <button class="qa qa-save" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa qa-more" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">雾林晨曦 · 4K 50fps 自然纪录</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">青松摄</span>
+                    <span class="sep"></span>
+                    <span>Bilibili</span>
+                    <span class="sep"></span>
+                    <span>上周</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Neon -->
+              <article class="vcard">
+                <div class="thumb ph-neon" data-placeholder>
+                  <span class="thumb-platform"><svg style="color:#1ab7ea"><use href="#ic-vimeo"/></svg></span>
+                  <span class="thumb-duration">02:47</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa" aria-label="like"><svg><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">深夜的便利店 · 短片实验</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">Aki Sato</span>
+                    <span class="sep"></span>
+                    <span>Vimeo</span>
+                    <span class="sep"></span>
+                    <span>4 月 12 日</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Selected (batch mode) -->
+              <article class="vcard" data-selectable="true" data-selected="true">
+                <div class="thumb ph-warm" data-placeholder>
+                  <span class="vcard-select" aria-label="selected"><svg><use href="#ic-check"/></svg></span>
+                  <span class="thumb-duration">08:21</span>
+                  <div class="thumb-actions">
+                    <button class="qa" aria-label="like"><svg><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">厨房的光 · 室内人像练习</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">Linh</span>
+                    <span class="sep"></span>
+                    <span>2 个月前</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Parsing state -->
+              <article class="vcard">
+                <div class="thumb ph-studio" data-placeholder>
+                  <span class="thumb-state" data-tone="warn">
+                    <span class="thumb-state-dot"></span>正在解析
+                  </span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">从剪贴板添加的视频</h4>
+                  <div class="vcard-meta">
+                    <span>10 秒前</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Source error -->
+              <article class="vcard">
+                <div class="thumb ph-studio" data-placeholder style="filter: saturate(0.5) brightness(0.8);">
+                  <span class="thumb-platform"><svg style="color:#ff0000"><use href="#ic-yt"/></svg></span>
+                  <span class="thumb-state" data-tone="danger">源已失效</span>
+                  <div class="thumb-actions">
+                    <button class="qa" aria-label="retry"><svg><use href="#ic-retry"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">某个被原作者删除的视频</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">Unknown</span>
+                    <span class="sep"></span>
+                    <span>上次访问 · 2 周前</span>
+                  </div>
+                </div>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 02 Portrait 9:16 ────────────────────────────────── -->
+        <section id="portrait" class="pr-section">
+          <header class="section-head">
+            <div class="num">02 · VideoCard.Portrait</div>
+            <h2>竖屏 9:16 卡</h2>
+            <p>TikTok、Reels、Shorts 这类天然竖屏的内容用它。同一套交互语法，更紧凑的栅格，标题最多 2 行。</p>
+          </header>
+
+          <div class="demo-panel">
+            <div class="cards-grid" data-aspect="portrait">
+
+              <article class="vcard" data-aspect="portrait">
+                <div class="thumb ph-violet" data-placeholder data-aspect="9:16">
+                  <span class="thumb-duration">00:32</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa" aria-label="like"><svg><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">紫色霓虹 · 一个 30 秒的瞬间</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">夜行</span>
+                    <span class="sep"></span><span>00:32</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="vcard" data-aspect="portrait" data-liked="true">
+                <div class="thumb ph-clay" data-placeholder data-aspect="9:16">
+                  <span class="thumb-duration">00:18</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa qa-like" data-tone="liked" aria-label="liked"><svg style="fill:currentColor;stroke:none"><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">陶土质感 · 慢镜头练习</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">林淼</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="vcard" data-aspect="portrait">
+                <div class="thumb ph-meadow" data-placeholder data-aspect="9:16">
+                  <span class="thumb-duration">01:04</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa" aria-label="like"><svg><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">风吹麦浪</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">阿野</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="vcard" data-aspect="portrait">
+                <div class="thumb ph-concert" data-placeholder data-aspect="9:16">
+                  <span class="thumb-duration">00:47</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa" aria-label="like"><svg><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">现场 · 红色聚光下</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">Echo</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="vcard" data-aspect="portrait" data-selectable="true" data-selected="true">
+                <div class="thumb ph-ocean" data-placeholder data-aspect="9:16">
+                  <span class="vcard-select" aria-label="selected"><svg><use href="#ic-check"/></svg></span>
+                  <span class="thumb-duration">00:24</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">海面以下</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">海蓝</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="vcard" data-aspect="portrait">
+                <div class="thumb ph-glacier" data-placeholder data-aspect="9:16">
+                  <span class="thumb-duration">00:58</span>
+                  <div class="thumb-play"><span class="thumb-play-disc"><svg><use href="#ic-play"/></svg></span></div>
+                  <div class="thumb-actions">
+                    <button class="qa" aria-label="like"><svg><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">冰川光线</h4>
+                  <div class="vcard-meta">
+                    <span class="creator">Frostine</span>
+                  </div>
+                </div>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 03 List ─────────────────────────────────────────── -->
+        <section id="list" class="pr-section">
+          <header class="section-head">
+            <div class="num">03 · VideoCard.List</div>
+            <h2>列表行</h2>
+            <p>密集浏览、合集内、搜索结果、拖动排序。左侧缩略图小一些（168px），右侧多行信息，行末出操作。</p>
+          </header>
+
+          <div class="demo-panel" style="padding: var(--space-3);">
+            <div class="vlist">
+              <div class="thumb ph-dusk" data-placeholder>
+                <span class="thumb-duration">12:34</span>
+              </div>
+              <div class="vlist-body">
+                <h4 class="vlist-title">春日的傍晚 · 街头摄影手记</h4>
+                <div class="vlist-meta">
+                  <span class="creator">岚野</span>
+                  <span class="sep"></span><span>YouTube</span>
+                  <span class="sep"></span><span>3 天前</span>
+                  <span class="sep"></span><span>1.2 GB</span>
+                </div>
+                <div class="vlist-tags">
+                  <span class="tag" data-size="sm">摄影</span>
+                  <span class="tag" data-size="sm">街头</span>
+                  <span class="tag" data-size="sm" data-tone="accent">精选</span>
+                </div>
+              </div>
+              <div class="vlist-actions">
+                <button class="icon-btn" data-size="sm" aria-label="like"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="save"><svg viewBox="0 0 24 24"><use href="#ic-bookmark"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+              </div>
+            </div>
+
+            <div class="vlist">
+              <div class="thumb ph-forest" data-placeholder>
+                <span class="thumb-duration">04:12</span>
+              </div>
+              <div class="vlist-body">
+                <h4 class="vlist-title">雾林晨曦 · 4K 50fps 自然纪录</h4>
+                <div class="vlist-meta">
+                  <span class="creator">青松摄</span>
+                  <span class="sep"></span><span>Bilibili</span>
+                  <span class="sep"></span><span>上周</span>
+                </div>
+              </div>
+              <div class="vlist-actions">
+                <button class="icon-btn" data-size="sm" aria-label="like"><svg viewBox="0 0 24 24" style="fill: oklch(0.78 0.16 25); stroke: none;"><use href="#ic-heart"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="save"><svg viewBox="0 0 24 24"><use href="#ic-bookmark"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+              </div>
+            </div>
+
+            <div class="vlist">
+              <div class="thumb ph-neon" data-placeholder>
+                <span class="thumb-duration">02:47</span>
+              </div>
+              <div class="vlist-body">
+                <h4 class="vlist-title">深夜的便利店 · 短片实验</h4>
+                <div class="vlist-meta">
+                  <span class="creator">Aki Sato</span>
+                  <span class="sep"></span><span>Vimeo</span>
+                  <span class="sep"></span><span>4 月 12 日</span>
+                </div>
+              </div>
+              <div class="vlist-actions">
+                <button class="icon-btn" data-size="sm" aria-label="like"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="save"><svg viewBox="0 0 24 24"><use href="#ic-bookmark"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+              </div>
+            </div>
+
+            <div class="vlist">
+              <div class="thumb ph-warm" data-placeholder>
+                <span class="thumb-duration">08:21</span>
+              </div>
+              <div class="vlist-body">
+                <h4 class="vlist-title">厨房的光 · 室内人像练习</h4>
+                <div class="vlist-meta">
+                  <span class="creator">Linh</span>
+                  <span class="sep"></span><span>2 个月前</span>
+                </div>
+              </div>
+              <div class="vlist-actions">
+                <button class="icon-btn" data-size="sm" aria-label="like"><svg viewBox="0 0 24 24"><use href="#ic-heart"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="save"><svg viewBox="0 0 24 24"><use href="#ic-bookmark"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+              </div>
+            </div>
+
+            <div class="vlist" data-selectable="true" data-selected="true">
+              <div class="vlist-select"><label class="check"><input type="checkbox" checked /></label></div>
+              <div class="thumb ph-meadow" data-placeholder>
+                <span class="thumb-duration">06:11</span>
+              </div>
+              <div class="vlist-body">
+                <h4 class="vlist-title">风吹麦浪 · 慢镜头长片段</h4>
+                <div class="vlist-meta">
+                  <span class="creator">阿野</span>
+                  <span class="sep"></span><span>YouTube</span>
+                </div>
+              </div>
+              <div class="vlist-actions"></div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── 04 Cover ────────────────────────────────────────── -->
+        <section id="cover" class="pr-section">
+          <header class="section-head">
+            <div class="num">04 · VideoCard.Cover</div>
+            <h2>大封面</h2>
+            <p>用在详情页头图、推荐位、"最近收藏"轮播首屏。21:9 全宽，标题用衬线字与正文形成节奏对比。</p>
+          </header>
+
+          <div class="demo-panel">
+            <div class="vcover">
+              <div class="thumb ph-dusk" data-placeholder data-aspect="21:9">
+                <span class="thumb-platform"><svg style="color:#ff0000"><use href="#ic-yt"/></svg></span>
+                <span class="thumb-duration">28:47</span>
+                <div class="thumb-play"><span class="thumb-play-disc" style="width: 56px; height: 56px;"><svg style="width:22px;height:22px;"><use href="#ic-play"/></svg></span></div>
+              </div>
+              <div class="vcover-body">
+                <div class="vcover-eyebrow">最近收藏 · 一部值得回看的纪录</div>
+                <h3 class="vcover-title">城市的夜，与它的体温——三段访谈与一段空镜</h3>
+                <div class="vcover-meta">
+                  <span class="t-secondary">岚野</span>
+                  <span class="divider-v"></span>
+                  <span class="t-tertiary">YouTube · 28:47 · 收藏于 5 月 8 日</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 05 Collection ───────────────────────────────────── -->
+        <section id="collection" class="pr-section">
+          <header class="section-head">
+            <div class="num">05 · CollectionCard</div>
+            <h2>合集卡</h2>
+            <p>三层缩略图叠层，最近的三段视频隐约可见。悬停时叠层轻微展开，像翻开了一沓照片。</p>
+          </header>
+
+          <div class="demo-panel">
+            <div class="cards-grid">
+
+              <article class="ccard" style="--placeholder-bg: var(--placeholder-bg-fr); --placeholder-bg-mid: var(--placeholder-bg-mid-fr); --placeholder-bg-back: var(--placeholder-bg-back-fr);">
+                <div class="ccard-stack">
+                  <div class="layer layer-back ph-violet"></div>
+                  <div class="layer layer-mid ph-neon"></div>
+                  <div class="layer layer-bg ph-dusk"></div>
+                  <span class="count"><svg><use href="#ic-stack"/></svg>27 个视频</span>
+                </div>
+                <div class="ccard-body">
+                  <h4 class="ccard-title">夜晚摄影</h4>
+                  <span class="ccard-sub">最近更新 · 3 天前</span>
+                </div>
+              </article>
+
+              <article class="ccard">
+                <div class="ccard-stack">
+                  <div class="layer layer-back ph-meadow"></div>
+                  <div class="layer layer-mid ph-glacier"></div>
+                  <div class="layer layer-bg ph-forest"></div>
+                  <span class="count"><svg><use href="#ic-stack"/></svg>12 个</span>
+                </div>
+                <div class="ccard-body">
+                  <h4 class="ccard-title">自然纪录</h4>
+                  <span class="ccard-sub">最近更新 · 上周</span>
+                </div>
+              </article>
+
+              <article class="ccard">
+                <div class="ccard-stack">
+                  <div class="layer layer-back ph-warm"></div>
+                  <div class="layer layer-mid ph-clay"></div>
+                  <div class="layer layer-bg ph-studio"></div>
+                  <span class="count"><svg><use href="#ic-stack"/></svg>43 个</span>
+                </div>
+                <div class="ccard-body">
+                  <h4 class="ccard-title">动效灵感</h4>
+                  <span class="ccard-sub">最近更新 · 1 月前</span>
+                </div>
+              </article>
+
+              <article class="ccard">
+                <div class="ccard-stack">
+                  <div class="layer layer-back ph-glacier"></div>
+                  <div class="layer layer-mid ph-snow"></div>
+                  <div class="layer layer-bg ph-ocean"></div>
+                  <span class="count"><svg><use href="#ic-stack"/></svg>8 个</span>
+                </div>
+                <div class="ccard-body">
+                  <h4 class="ccard-title">待看</h4>
+                  <span class="ccard-sub">最近更新 · 昨日</span>
+                </div>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 06 Creator ──────────────────────────────────────── -->
+        <section id="creator" class="pr-section">
+          <header class="section-head">
+            <div class="num">06 · CreatorCard</div>
+            <h2>创作者卡</h2>
+            <p>极简一行。头像 + 名字 + 平台 + 视频数。整张卡可点击进入该创作者的视频流。</p>
+          </header>
+
+          <div class="demo-panel">
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-3);">
+
+              <article class="kcard">
+                <span class="avatar" data-size="lg" style="background: linear-gradient(135deg, oklch(0.55 0.08 30), oklch(0.35 0.06 250));">岚</span>
+                <div class="kcard-body">
+                  <h4 class="kcard-name">岚野</h4>
+                  <div class="kcard-meta">
+                    <span style="color:#ff5555">●</span><span>YouTube</span>
+                    <span class="sep"></span><span>33 个视频</span>
+                  </div>
+                </div>
+                <div class="kcard-action">
+                  <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+                </div>
+              </article>
+
+              <article class="kcard">
+                <span class="avatar" data-size="lg" style="background: linear-gradient(135deg, oklch(0.50 0.08 150), oklch(0.30 0.04 180));">青</span>
+                <div class="kcard-body">
+                  <h4 class="kcard-name">青松摄</h4>
+                  <div class="kcard-meta">
+                    <span style="color:#00aeec">●</span><span>Bilibili</span>
+                    <span class="sep"></span><span>12 个视频</span>
+                  </div>
+                </div>
+                <div class="kcard-action">
+                  <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+                </div>
+              </article>
+
+              <article class="kcard">
+                <span class="avatar" data-size="lg" style="background: linear-gradient(135deg, oklch(0.45 0.16 310), oklch(0.20 0.05 280));">A</span>
+                <div class="kcard-body">
+                  <h4 class="kcard-name">Aki Sato</h4>
+                  <div class="kcard-meta">
+                    <span style="color:#1ab7ea">●</span><span>Vimeo</span>
+                    <span class="sep"></span><span>7 个视频</span>
+                  </div>
+                </div>
+                <div class="kcard-action">
+                  <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+                </div>
+              </article>
+
+              <article class="kcard">
+                <span class="avatar" data-size="lg" style="background: linear-gradient(135deg, oklch(0.55 0.10 60), oklch(0.30 0.04 30));">L</span>
+                <div class="kcard-body">
+                  <h4 class="kcard-name">Linh Studio</h4>
+                  <div class="kcard-meta">
+                    <span style="color:#ff5555">●</span><span>YouTube</span>
+                    <span class="sep"></span><span>24 个视频</span>
+                  </div>
+                </div>
+                <div class="kcard-action">
+                  <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+                </div>
+              </article>
+
+              <article class="kcard">
+                <span class="avatar" data-size="lg" style="background: linear-gradient(135deg, oklch(0.48 0.07 230), oklch(0.20 0.04 240));">E</span>
+                <div class="kcard-body">
+                  <h4 class="kcard-name">Echo</h4>
+                  <div class="kcard-meta">
+                    <span class="sep" style="background:var(--text-tertiary)"></span><span>多平台</span>
+                    <span class="sep"></span><span>4 个视频</span>
+                  </div>
+                </div>
+                <div class="kcard-action">
+                  <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+                </div>
+              </article>
+
+              <article class="kcard">
+                <span class="avatar" data-size="lg" style="background: linear-gradient(135deg, oklch(0.60 0.10 130), oklch(0.30 0.06 150));">阿</span>
+                <div class="kcard-body">
+                  <h4 class="kcard-name">阿野</h4>
+                  <div class="kcard-meta">
+                    <span style="color:#ff5555">●</span><span>YouTube</span>
+                    <span class="sep"></span><span>9 个视频</span>
+                  </div>
+                </div>
+                <div class="kcard-action">
+                  <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+                </div>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 07 Download ─────────────────────────────────────── -->
+        <section id="download" class="pr-section">
+          <header class="section-head">
+            <div class="num">07 · DownloadCard.Row</div>
+            <h2>下载行</h2>
+            <p>下载页专属。进度条只有 2px——细到几乎不打扰视线。完成后整张卡退化为普通视频列表行：进度元素消失，整张卡变可点。</p>
+          </header>
+
+          <div class="demo-panel">
+
+            <div class="dcard" data-status="downloading">
+              <div class="thumb ph-dusk" data-placeholder>
+                <span class="thumb-duration">12:34</span>
+              </div>
+              <div class="dcard-body">
+                <h4 class="dcard-title">春日的傍晚 · 街头摄影手记 · 1080p</h4>
+                <div class="dcard-stats">
+                  <span class="stage" data-tone="warn">下载中</span>
+                  <span class="sep">·</span>
+                  <span>728 MB / 1.2 GB</span>
+                  <span class="sep">·</span>
+                  <span>4.2 MB/s</span>
+                  <span class="sep">·</span>
+                  <span>剩余 1 分 47 秒</span>
+                </div>
+                <div class="dcard-progress">
+                  <div class="dcard-progress-fill" style="width: 62%;"></div>
+                </div>
+              </div>
+              <div class="dcard-actions">
+                <button class="icon-btn" data-size="sm" aria-label="pause"><svg viewBox="0 0 24 24"><use href="#ic-pause"/></svg></button>
+                <button class="icon-btn" data-size="sm" data-tone="danger" aria-label="cancel"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+              </div>
+            </div>
+
+            <div class="dcard" data-status="paused">
+              <div class="thumb ph-warm" data-placeholder>
+                <span class="thumb-duration">08:21</span>
+              </div>
+              <div class="dcard-body">
+                <h4 class="dcard-title">厨房的光 · 4K HEVC</h4>
+                <div class="dcard-stats">
+                  <span class="stage" data-tone="warn">已暂停</span>
+                  <span class="sep">·</span>
+                  <span>1.4 GB / 4.2 GB</span>
+                </div>
+                <div class="dcard-progress">
+                  <div class="dcard-progress-fill" style="width: 33%;"></div>
+                </div>
+              </div>
+              <div class="dcard-actions">
+                <button class="icon-btn" data-size="sm" aria-label="resume"><svg viewBox="0 0 24 24"><use href="#ic-play"/></svg></button>
+                <button class="icon-btn" data-size="sm" data-tone="danger" aria-label="cancel"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+              </div>
+            </div>
+
+            <div class="dcard" data-status="queued">
+              <div class="thumb ph-forest" data-placeholder>
+                <span class="thumb-duration">04:12</span>
+              </div>
+              <div class="dcard-body">
+                <h4 class="dcard-title">雾林晨曦 · 4K 50fps</h4>
+                <div class="dcard-stats">
+                  <span class="stage">排队中 · 第 2 位</span>
+                  <span class="sep">·</span>
+                  <span>预计 1.8 GB</span>
+                </div>
+                <div class="dcard-progress">
+                  <div class="dcard-progress-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div class="dcard-actions">
+                <button class="icon-btn" data-size="sm" aria-label="move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+                <button class="icon-btn" data-size="sm" data-tone="danger" aria-label="cancel"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+              </div>
+            </div>
+
+            <div class="dcard" data-status="downloading">
+              <div class="thumb ph-neon" data-placeholder>
+                <span class="thumb-duration">02:47</span>
+              </div>
+              <div class="dcard-body">
+                <h4 class="dcard-title">深夜的便利店 · 解析片段</h4>
+                <div class="dcard-stats">
+                  <span class="stage" data-tone="warn">正在解析源</span>
+                  <span class="sep">·</span>
+                  <span>第 3 / 12 段</span>
+                </div>
+                <div class="dcard-progress" data-indeterminate="true">
+                  <div class="dcard-progress-fill"></div>
+                </div>
+              </div>
+              <div class="dcard-actions">
+                <button class="icon-btn" data-size="sm" aria-label="pause"><svg viewBox="0 0 24 24"><use href="#ic-pause"/></svg></button>
+                <button class="icon-btn" data-size="sm" data-tone="danger" aria-label="cancel"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+              </div>
+            </div>
+
+            <div class="dcard" data-status="failed">
+              <div class="thumb ph-studio" data-placeholder style="filter: saturate(0.5);">
+                <span class="thumb-state" data-tone="danger">失败</span>
+              </div>
+              <div class="dcard-body">
+                <h4 class="dcard-title">某个被原作者删除的视频</h4>
+                <div class="dcard-stats">
+                  <span class="stage" data-tone="danger">源已失效</span>
+                  <span class="sep">·</span>
+                  <span>HTTP 404 · 12 分钟前</span>
+                </div>
+                <div class="dcard-progress">
+                  <div class="dcard-progress-fill" style="width: 100%;"></div>
+                </div>
+              </div>
+              <div class="dcard-actions">
+                <button class="icon-btn" data-size="sm" aria-label="retry"><svg viewBox="0 0 24 24"><use href="#ic-retry"/></svg></button>
+                <button class="icon-btn" data-size="sm" data-tone="danger" aria-label="remove"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+              </div>
+            </div>
+
+            <div class="dcard" data-status="complete">
+              <div class="thumb ph-meadow" data-placeholder>
+                <span class="thumb-duration">06:11</span>
+              </div>
+              <div class="dcard-body">
+                <h4 class="dcard-title">风吹麦浪 · 慢镜头长片段</h4>
+                <div class="dcard-stats">
+                  <span class="stage" data-tone="success">已完成</span>
+                  <span class="sep">·</span>
+                  <span>820 MB</span>
+                  <span class="sep">·</span>
+                  <span>5 分钟前</span>
+                </div>
+              </div>
+              <div class="dcard-actions">
+                <button class="icon-btn" data-size="sm" aria-label="open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+                <button class="icon-btn" data-size="sm" aria-label="more"><svg viewBox="0 0 24 24"><use href="#ic-more"/></svg></button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── 08 Batch select ─────────────────────────────────── -->
+        <section id="batch" class="pr-section">
+          <header class="section-head">
+            <div class="num">08 · Batch Select</div>
+            <h2>批量选中</h2>
+            <p>顶栏滑出一个 toolbar 时进入批量模式：所有卡片左上出现 checkbox（hover 时显形，选中后常显），快捷操作隐藏，整张卡变成"可选"对象。点击卡片不再进入详情而是切换选中。</p>
+          </header>
+
+          <div class="demo-panel">
+            <div class="toolbar-mock">
+              <div class="tm-left">
+                <span class="tag" data-tone="accent" data-shape="pill"><span class="tag-dot"></span>已选 3 个</span>
+                <a href="#" class="t-caption" style="color: var(--text-secondary); text-decoration: none;">全选 · 反选 · 清除</a>
+              </div>
+              <div class="tm-right">
+                <button class="btn" data-variant="secondary" data-size="sm">+ 加入合集</button>
+                <button class="btn" data-variant="secondary" data-size="sm">+ 添加标签</button>
+                <button class="btn" data-variant="secondary" data-size="sm">下载</button>
+                <button class="btn" data-variant="danger" data-size="sm">删除</button>
+                <span class="divider-v"></span>
+                <button class="icon-btn" data-size="sm" aria-label="exit"><svg viewBox="0 0 24 24"><use href="#ic-close"/></svg></button>
+              </div>
+            </div>
+
+            <div class="cards-grid">
+              <article class="vcard" data-selectable="true" data-selected="true">
+                <div class="thumb ph-dusk" data-placeholder>
+                  <span class="vcard-select"><svg><use href="#ic-check"/></svg></span>
+                  <span class="thumb-duration">12:34</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">春日的傍晚 · 街头摄影手记</h4>
+                  <div class="vcard-meta"><span class="creator">岚野</span><span class="sep"></span><span>3 天前</span></div>
+                </div>
+              </article>
+
+              <article class="vcard" data-selectable="true">
+                <div class="thumb ph-forest" data-placeholder>
+                  <span class="vcard-select"></span>
+                  <span class="thumb-duration">04:12</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">雾林晨曦 · 4K 50fps 自然纪录</h4>
+                  <div class="vcard-meta"><span class="creator">青松摄</span><span class="sep"></span><span>上周</span></div>
+                </div>
+              </article>
+
+              <article class="vcard" data-selectable="true" data-selected="true">
+                <div class="thumb ph-neon" data-placeholder>
+                  <span class="vcard-select"><svg><use href="#ic-check"/></svg></span>
+                  <span class="thumb-duration">02:47</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">深夜的便利店 · 短片实验</h4>
+                  <div class="vcard-meta"><span class="creator">Aki Sato</span><span class="sep"></span><span>4 月 12 日</span></div>
+                </div>
+              </article>
+
+              <article class="vcard" data-selectable="true" data-selected="true">
+                <div class="thumb ph-warm" data-placeholder>
+                  <span class="vcard-select"><svg><use href="#ic-check"/></svg></span>
+                  <span class="thumb-duration">08:21</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">厨房的光 · 室内人像练习</h4>
+                  <div class="vcard-meta"><span class="creator">Linh</span><span class="sep"></span><span>2 个月前</span></div>
+                </div>
+              </article>
+
+              <article class="vcard" data-selectable="true">
+                <div class="thumb ph-meadow" data-placeholder>
+                  <span class="vcard-select"></span>
+                  <span class="thumb-duration">06:11</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">风吹麦浪 · 慢镜头长片段</h4>
+                  <div class="vcard-meta"><span class="creator">阿野</span></div>
+                </div>
+              </article>
+
+              <article class="vcard" data-selectable="true">
+                <div class="thumb ph-glacier" data-placeholder>
+                  <span class="vcard-select"></span>
+                  <span class="thumb-duration">03:08</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">冰川光线</h4>
+                  <div class="vcard-meta"><span class="creator">Frostine</span></div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 09 Special states summary ──────────────────────── -->
+        <section id="states" class="pr-section">
+          <header class="section-head">
+            <div class="num">09 · Special States</div>
+            <h2>特殊态总表</h2>
+            <p>这是同一种卡片在不同生命周期下的样子。差异通过缩略图状态徽标传达——没有任何形式上的变化。</p>
+          </header>
+
+          <div class="demo-panel">
+            <div class="cards-grid" data-density="dense">
+
+              <article class="vcard">
+                <div class="thumb ph-dusk" data-placeholder>
+                  <span class="thumb-duration">12:34</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">默认状态</h4>
+                  <div class="vcard-meta"><span class="creator">岚野</span></div>
+                </div>
+              </article>
+
+              <article class="vcard">
+                <div class="thumb" data-placeholder data-loading="true"></div>
+                <div>
+                  <div class="skel" style="height: 16px; width: 80%;"></div>
+                  <div class="skel" style="height: 12px; width: 40%; margin-top: 8px;"></div>
+                </div>
+              </article>
+
+              <article class="vcard">
+                <div class="thumb ph-studio" data-placeholder>
+                  <span class="thumb-state" data-tone="warn">
+                    <span class="thumb-state-dot"></span>正在解析
+                  </span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">从剪贴板添加</h4>
+                  <div class="vcard-meta"><span>10 秒前</span></div>
+                </div>
+              </article>
+
+              <article class="vcard">
+                <div class="thumb ph-studio" data-placeholder style="filter: saturate(0.5) brightness(0.7);">
+                  <span class="thumb-state" data-tone="danger">源已失效</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">访问失败</h4>
+                  <div class="vcard-meta"><span class="creator">Unknown</span></div>
+                </div>
+              </article>
+
+              <article class="vcard" data-liked="true">
+                <div class="thumb ph-warm" data-placeholder>
+                  <span class="thumb-duration">04:21</span>
+                  <div class="thumb-actions">
+                    <button class="qa qa-like" data-tone="liked" aria-label="liked"><svg style="fill:currentColor;stroke:none"><use href="#ic-heart"/></svg></button>
+                    <button class="qa" aria-label="save"><svg><use href="#ic-bookmark"/></svg></button>
+                    <button class="qa" aria-label="more"><svg><use href="#ic-more"/></svg></button>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="vcard-title">已喜欢</h4>
+                  <div class="vcard-meta"><span class="creator">Linh</span></div>
+                </div>
+              </article>
+
+              <article class="vcard" data-selectable="true" data-selected="true">
+                <div class="thumb ph-forest" data-placeholder>
+                  <span class="vcard-select"><svg><use href="#ic-check"/></svg></span>
+                  <span class="thumb-duration">04:12</span>
+                </div>
+                <div>
+                  <h4 class="vcard-title">已选中</h4>
+                  <div class="vcard-meta"><span class="creator">青松摄</span></div>
+                </div>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+        <footer class="foot">
+          <span>VEW · Pass 3a · <span class="t-mono">cards v0.1</span></span>
+          <span>← <a href="feedback.html">Feedback</a> · Next: Pass 3b Chrome &amp; Player</span>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <script src="src/theme.js"></script>
+  <script src="src/i18n.js"></script>
+  <script>
+    function syncThemeSegment() {
+      const mode = document.documentElement.dataset.themeMode || 'dark';
+      document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.themeSet === mode ? 'true' : 'false'));
+    }
+    document.querySelectorAll('[data-theme-set]').forEach((b) => b.addEventListener('click', () => { window.VEWTheme.set(b.dataset.themeSet); syncThemeSegment(); }));
+    syncThemeSegment();
+
+    /* Card interactions: toggle select, toggle like (when card has data-selectable or data-liked-toggle) */
+    document.addEventListener('click', (e) => {
+      // Toggle select for selectable cards
+      const card = e.target.closest('.vcard[data-selectable="true"]');
+      if (card && !e.target.closest('.qa, .thumb-actions button')) {
+        card.dataset.selected = card.dataset.selected === 'true' ? 'false' : 'true';
+        const checkSvg = card.querySelector('.vcard-select');
+        if (checkSvg) {
+          if (card.dataset.selected === 'true' && checkSvg.children.length === 0) {
+            checkSvg.innerHTML = '<svg viewBox="0 0 24 24"><use href="#ic-check"/></svg>';
+          } else if (card.dataset.selected !== 'true') {
+            checkSvg.innerHTML = '';
+          }
+        }
+      }
+      // Toggle like on qa-like
+      const likeBtn = e.target.closest('.qa-like');
+      if (likeBtn) {
+        const c = likeBtn.closest('.vcard');
+        if (c) {
+          c.dataset.liked = c.dataset.liked === 'true' ? 'false' : 'true';
+          if (c.dataset.liked === 'true') likeBtn.dataset.tone = 'liked';
+          else delete likeBtn.dataset.tone;
+        }
+        e.stopPropagation();
+      }
+    });
+
+    /* TOC active */
+    (function () {
+      const links = document.querySelectorAll('[data-toc]');
+      const map = {}; links.forEach((l) => (map[l.dataset.toc] = l));
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove('active'));
+            const id = e.target.id;
+            if (map[id]) map[id].classList.add('active');
+          }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      ['grid','portrait','list','cover','collection','creator','download','batch','states'].forEach((id) => {
+        const el = document.getElementById(id); if (el) obs.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>

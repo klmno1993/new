@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="filename" content="vew_brand_identity.html">
+    <title>VEW - Brand Identity System</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0',
+                            300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b',
+                            600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a',
+                        },
+                        brand: {
+                            accent: '#3b82f6' // Subtle blue accent
+                        }
+                    },
+                    transitionTimingFunction: {
+                        'swan': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    backgroundImage: {
+                        'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.01) 100%)',
+                        'hero-glow': 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 1) 70%)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #0f172a; /* Outer dark background */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Clean scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Smooth Reveal Animations */
+        .reveal-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* The Swan Floating Animation for Hero Logo */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Blueprint Grid Background */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+        }
+        .bg-grid-dark {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="w-full min-h-screen">
+
+    <!-- Strict Desktop Container: Fixed 1440px width, centered -->
+    <div class="w-[1440px] flex flex-col min-h-screen bg-slate-50 relative overflow-hidden shadow-2xl shadow-black/50">
+        
+        <!-- ================= HERO SECTION (DARK MODE REVEAL) ================= -->
+        <header class="relative w-full h-screen flex flex-col items-center justify-center bg-slate-900 bg-hero-glow overflow-hidden">
+            <!-- Abstract background elements for premium feel -->
+            <div class="absolute inset-0 bg-grid-dark opacity-50 z-0"></div>
+            <div class="absolute -top-[20%] -right-[10%] w-[800px] h-[800px] bg-brand-accent/5 rounded-full blur-[120px] z-0"></div>
+            
+            <!-- Navbar -->
+            <nav class="absolute top-0 w-full px-12 py-8 flex justify-between items-center z-20">
+                <div class="flex items-center gap-2 text-white/50 text-xs font-mono tracking-widest uppercase">
+                    <span>VEW</span>
+                    <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                    <span>Brand Identity</span>
+                </div>
+                <div class="text-white/30 text-xs font-mono">v1.0.0 &middot; The White Swan</div>
+            </nav>
+
+            <!-- Main Hero Content -->
+            <div class="z-10 flex flex-col items-center animate-float mt-[-5%]">
+                <!-- THE LOGOMARK SVG -->
+                <!-- Concept: "The Prism V". Left wing is solid (media base), right wing is glass/transparent (invisible design). -->
+                <div class="w-40 h-40 mb-10 relative">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-2xl">
+                        <!-- Left Solid Wing -->
+                        <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#ffffff" />
+                        <!-- Right Glass/Gradient Wing -->
+                        <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="url(#hero-gradient)" style="mix-blend-mode: normal;" opacity="0.6" />
+                        <!-- Subtle corner cuts to imply sharpness/precision -->
+                        <defs>
+                            <linearGradient id="hero-gradient" x1="100" y1="20" x2="40" y2="90" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#ffffff" stop-opacity="1"/>
+                                <stop offset="1" stop-color="#94a3b8" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <!-- THE LOGOTYPE -->
+                <h1 class="text-white font-bold tracking-[-0.04em] text-[80px] leading-none mb-6">VEW</h1>
+                
+                <p class="text-slate-400 text-sm font-medium tracking-wide text-center max-w-sm">
+                    Personal. Clean. Media-first.<br>
+                    <span class="opacity-60 text-xs mt-2 block">Design is invisible until removed.</span>
+                </p>
+            </div>
+
+            <!-- Scroll indicator -->
+            <div class="absolute bottom-12 flex flex-col items-center gap-2 opacity-50 z-10">
+                <span class="text-[10px] text-white font-mono tracking-widest uppercase">Scroll to explore</span>
+                <i data-lucide="arrow-down" class="w-4 h-4 text-white animate-bounce"></i>
+            </div>
+        </header>
+
+        <!-- ================= CONTENT SECTIONS ================= -->
+        <main class="w-full bg-white z-20 relative rounded-t-[40px] -mt-10 pt-24 pb-32 px-24 flex flex-col gap-40">
+
+            <!-- SECTION 1: THE CONCEPT -->
+            <section class="reveal-item flex gap-24 items-center">
+                <div class="flex-1">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4 font-mono">01. The Concept</h2>
+                    <h3 class="text-4xl font-semibold text-slate-900 tracking-tight leading-tight mb-6">
+                        The White Swan, <br>Translated into Geometry.
+                    </h3>
+                    <p class="text-slate-500 leading-relaxed text-sm mb-6 text-justify">
+                        To visualize the "White Swan" principle, we avoided literal interpretations of birds or generic camera icons. Instead, we focused on the core action: <strong>Viewing</strong> and <strong>Bookmarking</strong>.
+                    </p>
+                    <p class="text-slate-500 leading-relaxed text-sm text-justify">
+                        The logo is constructed from two precise geometric strokes forming a "V". The left stroke is solid and grounded, representing your curated media collection. The right stroke is translucent and fades away, representing the invisible, friction-less design interface. Together, they subtly form a downward arrow (bookmarking) and a perspective play button.
+                    </p>
+                </div>
+                
+                <div class="flex-1 relative aspect-square bg-slate-50 rounded-3xl border border-slate-100 overflow-hidden flex items-center justify-center bg-grid">
+                    <!-- Deconstructed Logo Animation -->
+                    <div class="w-48 h-48 relative group">
+                        <!-- Left wing -->
+                        <div class="absolute inset-0 transition-transform duration-700 ease-swan group-hover:-translate-x-4 group-hover:-translate-y-4">
+                            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-sm">
+                                <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#0f172a" />
+                            </svg>
+                        </div>
+                        <!-- Right wing -->
+                        <div class="absolute inset-0 transition-transform duration-700 ease-swan group-hover:translate-x-4 group-hover:translate-y-4">
+                            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-sm">
+                                <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#64748b" opacity="0.6" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-6 right-6 text-[10px] text-slate-400 font-mono">Hover to deconstruct</div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: LOGOMARK & CONSTRUCTION -->
+            <section class="reveal-item">
+                <div class="mb-12">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4 font-mono">02. Construction</h2>
+                    <h3 class="text-3xl font-semibold text-slate-900 tracking-tight">Precision & Proportion</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <!-- Grid Blueprint -->
+                    <div class="h-[400px] bg-slate-900 rounded-3xl p-12 relative flex items-center justify-center overflow-hidden border border-slate-800 shadow-xl shadow-slate-900/20">
+                        <div class="absolute inset-0 bg-grid-dark opacity-30"></div>
+                        
+                        <!-- Construction lines (SVG) -->
+                        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-48 h-48 relative z-10">
+                            <!-- Helper Lines -->
+                            <line x1="20" y1="0" x2="20" y2="120" stroke="#3b82f6" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.5"/>
+                            <line x1="100" y1="0" x2="100" y2="120" stroke="#3b82f6" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.5"/>
+                            <circle cx="50" cy="90" r="2" fill="#3b82f6"/>
+                            <circle cx="55" cy="90" r="2" fill="#3b82f6"/>
+                            
+                            <!-- Logo Outline -->
+                            <path d="M20 20 L50 90 L65 90 L35 20 Z" stroke="#ffffff" stroke-width="1" fill="none" />
+                            <path d="M100 20 L55 90 L40 90 L85 20 Z" stroke="#ffffff" stroke-width="1" fill="none" opacity="0.5"/>
+                        </svg>
+
+                        <div class="absolute bottom-6 left-8 text-xs text-white/50 font-mono">X: 120 / Y: 120 / Angle: 68&deg;</div>
+                    </div>
+
+                    <!-- Clear Space -->
+                    <div class="h-[400px] bg-slate-50 rounded-3xl p-12 relative flex items-center justify-center border border-slate-200">
+                        <div class="relative">
+                            <!-- Clear space box -->
+                            <div class="absolute -inset-8 border border-brand-accent/30 bg-brand-accent/5 rounded-xl border-dashed flex items-start justify-center">
+                                <span class="absolute -top-6 text-[10px] font-mono text-brand-accent">CLEAR SPACE = X/2</span>
+                            </div>
+                            <!-- Logo -->
+                            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-32 h-32 relative z-10">
+                                <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#0f172a" />
+                                <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#64748b" opacity="0.6" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: TYPOGRAPHY (LOGOTYPE) -->
+            <section class="reveal-item">
+                <div class="mb-12">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4 font-mono">03. Typography</h2>
+                    <h3 class="text-3xl font-semibold text-slate-900 tracking-tight">The Wordmark</h3>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <div class="bg-white border border-slate-100 p-16 rounded-t-3xl shadow-sm flex items-center justify-center">
+                        <div class="flex items-center gap-6">
+                            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-16 h-16">
+                                <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#0f172a" />
+                                <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#64748b" opacity="0.6" />
+                            </svg>
+                            <!-- Custom tracking to make it look like a logotype rather than just typed text -->
+                            <span class="text-[56px] font-bold text-slate-900 tracking-[-0.04em] leading-none mt-1">VEW</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-50 border border-slate-100 p-8 rounded-b-3xl grid grid-cols-3 gap-8 text-sm text-slate-500">
+                        <div>
+                            <span class="block text-[10px] font-mono text-slate-400 mb-1">Typeface</span>
+                            <span class="font-medium text-slate-900">Inter (Customized tracking)</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-mono text-slate-400 mb-1">Weight</span>
+                            <span class="font-medium text-slate-900">Bold (700)</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-mono text-slate-400 mb-1">Letter Spacing</span>
+                            <span class="font-medium text-slate-900">-0.04em (Tight)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: COLORWAYS -->
+            <section class="reveal-item">
+                <div class="mb-12">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4 font-mono">04. Colorways</h2>
+                    <h3 class="text-3xl font-semibold text-slate-900 tracking-tight">Adaptive Environments</h3>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6">
+                    <!-- Light Mode -->
+                    <div class="aspect-[4/3] bg-white border border-slate-200 rounded-2xl flex flex-col items-center justify-center relative group">
+                        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 mb-4 transition-transform duration-500 group-hover:scale-110">
+                            <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#0f172a" />
+                            <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#64748b" opacity="0.6" />
+                        </svg>
+                        <span class="text-2xl font-bold text-slate-900 tracking-[-0.04em]">VEW</span>
+                        <div class="absolute top-4 left-4 text-[10px] font-mono text-slate-400">Light / Default</div>
+                    </div>
+
+                    <!-- Dark Mode -->
+                    <div class="aspect-[4/3] bg-slate-900 rounded-2xl flex flex-col items-center justify-center relative group shadow-lg shadow-slate-900/10">
+                        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 mb-4 transition-transform duration-500 group-hover:scale-110">
+                            <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#ffffff" />
+                            <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#94a3b8" opacity="0.6" />
+                        </svg>
+                        <span class="text-2xl font-bold text-white tracking-[-0.04em]">VEW</span>
+                        <div class="absolute top-4 left-4 text-[10px] font-mono text-slate-500">Dark / Immersive</div>
+                    </div>
+
+                    <!-- Monochrome (Solid) -->
+                    <div class="aspect-[4/3] bg-slate-100 rounded-2xl flex flex-col items-center justify-center relative group border border-slate-200">
+                        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 mb-4 transition-transform duration-500 group-hover:scale-110">
+                            <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#0f172a" />
+                            <!-- Solid color for monochrome, no opacity trick -->
+                            <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#0f172a" />
+                        </svg>
+                        <span class="text-2xl font-bold text-slate-900 tracking-[-0.04em]">VEW</span>
+                        <div class="absolute top-4 left-4 text-[10px] font-mono text-slate-400">Monochrome / Print</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: APP ICON CONTEXT -->
+            <section class="reveal-item">
+                <div class="mb-12">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4 font-mono">05. Application</h2>
+                    <h3 class="text-3xl font-semibold text-slate-900 tracking-tight">App Icon</h3>
+                </div>
+
+                <div class="h-[400px] w-full bg-cover bg-center rounded-3xl overflow-hidden relative" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop');">
+                    <!-- Glass overlay for contrast -->
+                    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center gap-16">
+                        
+                        <!-- iOS Style Icon -->
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-32 h-32 bg-white rounded-[28px] shadow-2xl flex items-center justify-center p-6 relative overflow-hidden group hover:scale-105 transition-transform duration-500 ease-swan">
+                                <!-- Subtle inner glow/shadow -->
+                                <div class="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.05)] rounded-[28px] pointer-events-none"></div>
+                                <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                                    <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#0f172a" />
+                                    <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#64748b" opacity="0.6" />
+                                </svg>
+                            </div>
+                            <span class="text-white text-xs font-medium tracking-wide">VEW</span>
+                        </div>
+
+                        <!-- macOS Style Icon (Dark) -->
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-32 h-32 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-[28px] shadow-2xl flex items-center justify-center p-6 relative overflow-hidden group hover:scale-105 transition-transform duration-500 ease-swan shadow-black/50">
+                                <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-lg">
+                                    <path d="M20 20 L50 90 L65 90 L35 20 Z" fill="#ffffff" />
+                                    <path d="M100 20 L55 90 L40 90 L85 20 Z" fill="#94a3b8" opacity="0.6" />
+                                </svg>
+                            </div>
+                            <span class="text-white text-xs font-medium tracking-wide">VEW</span>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <footer class="bg-white border-t border-slate-100 py-8 text-center text-xs text-slate-400 font-mono">
+            VEW Design System &copy; 2024. The White Swan Initiative.
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // MANDATORY Timer Management Array
+        let scrollTimers = [];
+
+        // Scroll Reveal Logic for premium feel
+        function setupScrollReveal() {
+            const revealElements = document.querySelectorAll('.reveal-item');
+            
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 // Trigger when 15% visible
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        // Stagger the reveal using timers
+                        const timerId = setTimeout(() => {
+                            entry.target.classList.add('active');
+                        }, index * 150); // 150ms stagger
+                        
+                        scrollTimers.push(timerId);
+                        observer.unobserve(entry.target); // Only animate once
+                    }
+                });
+            }, observerOptions);
+
+            revealElements.forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Initialize animations on load
+        window.addEventListener('DOMContentLoaded', setupScrollReveal);
+
+        // Cleanup timers on page unload to prevent memory leaks (Best Practice)
+        window.addEventListener('unload', () => {
+            scrollTimers.forEach(timerId => clearTimeout(timerId));
+            console.log("Cleaned up animation timers.");
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,646 @@
+system
+
+
+GET
+/api/v1/health
+Health Check
+
+
+POST
+/api/v1/system/setup
+Setup
+
+
+POST
+/api/v1/system/restart
+SYS03 Restart service
+
+
+
+GET
+/api/v1/system/logs
+SYS04 Get system logs
+
+
+auth
+
+
+POST
+/api/v1/auth/login
+Login
+
+
+POST
+/api/v1/auth/refresh
+Refresh Token
+
+
+GET
+/api/v1/auth/verify
+Verify Token
+
+
+
+POST
+/api/v1/auth/logout
+A05 Logout
+
+
+
+PATCH
+/api/v1/auth/password
+Change Password
+
+
+videos
+
+
+GET
+/api/v1/videos
+V01 List videos
+
+
+
+POST
+/api/v1/videos
+V04 Add video
+
+
+
+GET
+/api/v1/videos/search
+V02 Search videos
+
+
+
+GET
+/api/v1/videos/check
+V16 Check if URL already saved
+
+
+
+GET
+/api/v1/videos/search/suggestions
+V17 Search suggestions
+
+
+
+POST
+/api/v1/videos/batch
+V18 Batch add videos
+
+
+
+DELETE
+/api/v1/videos/batch
+V19 Batch delete videos
+
+
+
+PATCH
+/api/v1/videos/batch/tags
+V20 Batch update video tags
+
+
+
+PATCH
+/api/v1/videos/batch/collections
+V21 Batch update video collections
+
+
+
+GET
+/api/v1/videos/{video_id}
+V03 Get video detail
+
+
+
+PATCH
+/api/v1/videos/{video_id}
+V05 Update video
+
+
+
+DELETE
+/api/v1/videos/{video_id}
+V12 Delete video
+
+
+
+PATCH
+/api/v1/videos/{video_id}/like
+V06 Toggle like
+
+
+
+PATCH
+/api/v1/videos/{video_id}/tags
+V10 Update video tags
+
+
+
+PATCH
+/api/v1/videos/{video_id}/collections
+V11 Update video collections
+
+
+
+GET
+/api/v1/videos/{video_id}/sources
+V07 Get video sources
+
+
+
+POST
+/api/v1/videos/{video_id}/sources
+V09 Add manual source
+
+
+
+POST
+/api/v1/videos/{video_id}/refresh-sources
+V08 Refresh video sources
+
+
+
+GET
+/api/v1/videos/{video_id}/stream
+V13 Stream proxy
+
+
+GET
+/api/v1/videos/{video_id}/stream/m3u8
+V14 m3u8 proxy
+
+
+DELETE
+/api/v1/videos/{video_id}/sources/{source_id}
+V22 Delete video source
+
+
+
+PATCH
+/api/v1/videos/{video_id}/sources/{source_id}
+V23 Update video source
+
+
+
+GET
+/api/v1/videos/{video_id}/thumbnail/proxy
+V24 Thumbnail proxy
+
+
+POST
+/api/v1/videos/{video_id}/thumbnail/refresh
+V25 Refresh thumbnail
+
+
+
+GET
+/api/v1/videos/{video_id}/parse-status
+V26 Get parse status
+
+
+
+GET
+/api/v1/videos/{video_id}/stream/segment
+V15 Segment proxy
+
+tags
+
+
+GET
+/api/v1/tags
+T01 List tags
+
+
+
+POST
+/api/v1/tags
+T02 Create tag
+
+
+
+PATCH
+/api/v1/tags/{tag_id}
+T03 Update tag
+
+
+
+DELETE
+/api/v1/tags/{tag_id}
+T04 Delete tag
+
+
+
+GET
+/api/v1/tags/{tag_id}
+T05 Get tag detail
+
+
+
+GET
+/api/v1/tags/{tag_id}/videos
+T06 Get videos for tag
+
+
+
+POST
+/api/v1/tags/merge
+T07 Merge tags
+
+
+creators
+
+
+GET
+/api/v1/creators
+C02 List creators
+
+
+
+GET
+/api/v1/creators/{creator_id}
+C01 Get creator detail
+
+
+
+PATCH
+/api/v1/creators/{creator_id}
+C03 Update creator info
+
+
+
+GET
+/api/v1/creators/{creator_id}/videos
+C04 Get creator videos
+
+
+collections
+
+
+GET
+/api/v1/collections
+CO01 List collections
+
+
+
+POST
+/api/v1/collections
+CO02 Create collection
+
+
+
+PATCH
+/api/v1/collections/{collection_id}
+CO03 Update collection
+
+
+
+DELETE
+/api/v1/collections/{collection_id}
+CO04 Delete collection
+
+
+
+GET
+/api/v1/collections/{collection_id}
+CO08 Get collection detail
+
+
+
+GET
+/api/v1/collections/{collection_id}/videos
+CO05 List collection videos
+
+
+
+PATCH
+/api/v1/collections/{collection_id}/videos/order
+CO06 Update video order
+
+
+
+DELETE
+/api/v1/collections/{collection_id}/videos/{video_id}
+CO07 Remove video from collection
+
+
+downloads
+
+
+GET
+/api/v1/downloads
+List Downloads
+
+
+
+POST
+/api/v1/downloads
+Create Download
+
+
+
+DELETE
+/api/v1/downloads/{download_id}
+Cancel Download
+
+
+
+GET
+/api/v1/downloads/{download_id}
+D05 Get download detail
+
+
+
+POST
+/api/v1/downloads/{download_id}/retry
+Retry Download
+
+
+
+POST
+/api/v1/downloads/{download_id}/pause
+D06 Pause download
+
+
+
+POST
+/api/v1/downloads/{download_id}/resume
+D07 Resume download
+
+
+
+GET
+/api/v1/downloads/{download_id}/progress
+D08 Get download progress
+
+
+notifications
+
+
+GET
+/api/v1/notifications
+List Notifications
+
+
+
+GET
+/api/v1/notifications/unread-count
+Get Unread Count
+
+
+
+PATCH
+/api/v1/notifications/read-all
+Mark All Read
+
+
+
+PATCH
+/api/v1/notifications/{notification_id}/read
+Mark Read
+
+
+
+DELETE
+/api/v1/notifications/{notification_id}
+N06 Delete single notification
+
+
+
+DELETE
+/api/v1/notifications/read
+Delete Read Notifications
+
+
+stats
+
+
+GET
+/api/v1/stats/overview
+Get Overview
+
+
+
+GET
+/api/v1/stats/by-platform
+Get By Platform
+
+
+
+GET
+/api/v1/stats/heatmap
+Get Heatmap
+
+
+
+GET
+/api/v1/stats/by-tag
+Get By Tag
+
+
+
+GET
+/api/v1/stats/by-creator
+ST05 Stats by creator
+
+
+
+GET
+/api/v1/stats/download-trend
+ST06 Download trend
+
+
+storage
+
+
+GET
+/api/v1/storage/stats
+Get Storage Stats Endpoint
+
+
+settings
+
+
+GET
+/api/v1/settings
+Get Settings
+
+
+
+PATCH
+/api/v1/settings/proxy
+Update Proxy
+
+
+
+POST
+/api/v1/settings/proxy/test
+Test Proxy
+
+
+parsers
+
+
+GET
+/api/v1/parsers
+List Parsers
+
+
+
+POST
+/api/v1/parsers/upload
+Upload Plugin
+
+
+
+POST
+/api/v1/parsers/{parser_id}/test
+Test Parser
+
+
+
+PATCH
+/api/v1/parsers/{parser_id}
+Update Parser
+
+
+
+DELETE
+/api/v1/parsers/{parser_id}
+Delete Parser
+
+
+
+GET
+/api/v1/parsers/logs
+Get All Logs
+
+
+
+GET
+/api/v1/parsers/{name}/logs
+Get Parser Logs
+
+
+tasks
+
+
+GET
+/api/v1/tasks/status
+Get Task Status
+
+
+
+POST
+/api/v1/tasks/{task_name}/trigger
+TK02 Trigger task manually
+
+
+modules
+
+
+GET
+/api/v1/modules
+List Modules
+
+
+
+PATCH
+/api/v1/modules/{module_id}
+Toggle Module
+
+
+users
+
+
+GET
+/api/v1/users/me
+U03 Get current user
+
+
+
+PATCH
+/api/v1/users/me
+U04 Update current user
+
+
+
+GET
+/api/v1/users/me/preferences
+Get Preferences
+
+
+
+PATCH
+/api/v1/users/me/preferences
+Update Preferences
+
+
+platforms
+
+
+GET
+/api/v1/platforms
+PL01 List supported platforms
+
+
+events
+
+
+GET
+/api/v1/events
+EV01 SSE event stream
+
+data
+
+
+GET
+/api/v1/data/export
+Export Data
+
+
+
+POST
+/api/v1/data/import
+Import Data
+
+
+
+Schemas
+Body_import_data_api_v1_data_import_postExpand allobject
+Body_upload_plugin_api_v1_parsers_upload_postExpand allobject
+ChangePasswordRequestExpand allobject
+CollectionCreateExpand allobject
+CollectionUpdateExpand allobject
+CreatorUpdateExpand allobject
+DownloadCreateExpand allobject
+HTTPValidationErrorExpand allobject
+LoginRequestExpand allobject
+LogoutRequestExpand allobject
+ParserPatchExpand allobject
+ParserTestRequestExpand allobject
+ProxyTestRequestExpand allobject
+ProxyUpdateExpand allobject
+RefreshRequestExpand allobject
+SetupRequestExpand allobject
+TagCreateExpand allobject
+TagUpdateExpand allobject
+UserPreferencesUpdateExpand allobject
+UserUpdateExpand allobject
+ValidationErrorExpand allobject
+VideoCreateExpand allobject
+VideoSourceCreateExpand allobject
+VideoSourceUpdateExpand allobject
+VideoUpdateExpand allobject
+_BatchAddBodyExpand allobject
+_BatchCollectionsBodyExpand allobject
+_BatchDeleteBodyExpand allobject
+_BatchTagsBodyExpand allobject
+_CollectionsBodyExpand allobject
+_LikeBodyExpand allobject
+_MergeBodyExpand allobject
+_OrderBodyExpand allobject
+_TagsBodyExpand allobject
+_ToggleBodyExpand allobject
