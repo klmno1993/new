@@ -1,0 +1,114 @@
+{
+  "app.name": "VEW",
+  "app.tagline": "你视觉灵感的私人避难所",
+
+  "nav.tokens": "设计令牌",
+  "nav.primitives": "基础组件",
+  "nav.feedback": "反馈与容器",
+  "nav.components": "业务组件",
+
+  "theme.label": "主题",
+  "theme.dark": "暗",
+  "theme.light": "亮",
+  "theme.auto": "跟随系统",
+
+  "lang.label": "语言",
+  "lang.zh": "中文",
+  "lang.en": "English",
+
+  "tokens.title": "设计令牌",
+  "tokens.subtitle": "贯穿 VEW 所有界面的视觉常量。下面每一项都不是装饰——它们是规则。",
+  "tokens.preamble.eyebrow": "白天鹅原则",
+  "tokens.preamble.body": "界面在水面上从容滑行，复杂在水面下勤勉划水。设计太过自然以至于察觉不到它的存在——但只要拿走任何一处，都会立刻感到别扭。",
+
+  "tokens.section.color": "色彩",
+  "tokens.section.color.desc": "四级背景层、四级文本、三级线条、一支克制的强调色，以及四种状态色。所有颜色用 OKLCH 定义，色相相近、饱和受控。",
+
+  "tokens.section.type": "排版",
+  "tokens.section.type.desc": "双字体系统：UI 用 Geist / 思源黑体处理一切功能性文字；Newsreader / 思源宋体只在需要驻足的瞬间出现。",
+
+  "tokens.section.space": "间距",
+  "tokens.section.space.desc": "4px 基线，11 个台阶。组件内部留白与组件之间的距离，永远从这里取值。",
+
+  "tokens.section.radius": "圆角",
+  "tokens.section.radius.desc": "五档圆角。媒体取 10，弹窗取 16，按钮取 6——克制而一致。",
+
+  "tokens.section.shadow": "阴影",
+  "tokens.section.shadow.desc": "暗色模式几乎用不到阴影，靠背景层级与边框分层；亮色模式下用三档软阴影承担悬浮感。",
+
+  "tokens.section.motion": "动效",
+  "tokens.section.motion.desc": "四条曲线，四档时长。组件不允许各写各的。",
+
+  "tokens.section.layout": "布局",
+  "tokens.section.layout.desc": "桌面优先的四档断点。容器最大宽度 1440，最常见间隔 24。",
+
+  "tokens.surface": "表面",
+  "tokens.text": "文本",
+  "tokens.line": "线条",
+  "tokens.accent": "强调",
+  "tokens.semantic": "状态",
+
+  "tokens.surface.canvas": "Canvas · 画布",
+  "tokens.surface.surface": "Surface · 卡片",
+  "tokens.surface.raised": "Raised · 浮起",
+  "tokens.surface.overlay": "Overlay · 覆层",
+  "tokens.surface.sunken": "Sunken · 内嵌",
+
+  "tokens.text.primary": "主要文本",
+  "tokens.text.secondary": "次要文本",
+  "tokens.text.tertiary": "弱化文本",
+  "tokens.text.disabled": "禁用文本",
+
+  "tokens.line.hairline": "发丝线",
+  "tokens.line.soft": "柔和线",
+  "tokens.line.strong": "强调线",
+
+  "tokens.accent.base": "强调",
+  "tokens.accent.soft": "强调（柔）",
+  "tokens.accent.line": "强调线条",
+
+  "tokens.semantic.success": "成功",
+  "tokens.semantic.warning": "警告",
+  "tokens.semantic.danger": "危险",
+  "tokens.semantic.info": "提示",
+
+  "type.sample.display.zh": "在静水之下，用力划水",
+  "type.sample.display.en": "Effortless above, deliberate below.",
+  "type.sample.body.zh": "VEW 是创作者与策展人的私人避难所。它剥离了社交平台的喧嚣，只把你收藏的视频，放在最干净的环境里。",
+  "type.sample.body.en": "VEW is a private refuge for creators and curators. It strips away the noise of social platforms and frames the videos you save in the quietest environment we know how to build.",
+  "type.sample.label": "标签 / Label",
+  "type.sample.mono": "00:01:23.456 · /api/v1/videos/abc123",
+
+  "primitives.title": "基础组件",
+  "primitives.subtitle": "所有更复杂的组件都从这些原子里长出来。每一个都遵循同一套交互语言：120ms hover · 200ms 状态切换 · 永远可键盘到达。",
+
+  "primitives.button": "按钮",
+  "primitives.button.primary": "主操作",
+  "primitives.button.secondary": "次操作",
+  "primitives.button.ghost": "幽灵",
+  "primitives.button.danger": "危险",
+  "primitives.button.disabled": "禁用",
+  "primitives.button.loading": "加载中",
+
+  "primitives.iconbutton": "图标按钮",
+  "primitives.tag": "标签",
+  "primitives.input": "输入",
+  "primitives.input.placeholder": "搜索你的收藏…",
+  "primitives.input.label": "邮箱",
+  "primitives.input.hint": "我们不会把它分享给任何人。",
+  "primitives.input.error": "邮箱格式不正确",
+
+  "primitives.switch": "开关",
+  "primitives.switch.on": "已开启",
+  "primitives.switch.off": "已关闭",
+
+  "common.action.save": "保存",
+  "common.action.cancel": "取消",
+  "common.action.delete": "删除",
+  "common.action.edit": "编辑",
+  "common.action.confirm": "确认",
+  "common.action.add": "添加",
+  "common.action.search": "搜索",
+  "common.action.like": "喜欢",
+  "common.action.more": "更多"
+}
